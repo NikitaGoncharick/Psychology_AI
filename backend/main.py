@@ -23,6 +23,14 @@ async def send (request: Request, text: str = Form(...)):
         "message.html",{"request": request, "user_text": text, "ai_reply": reply}
     )
 
+@app.get("/login")
+async def login_page(request: Request):
+    return templates.TemplateResponse("login_page.html", {"request": request})
+
+@app.get("/register")
+async def register_page(request: Request):
+    return templates.TemplateResponse("register_page.html", {"request": request})
+
 
 if __name__ == "__main__":
     uvicorn.run(app, host="127.0.0.1", port=8000)
