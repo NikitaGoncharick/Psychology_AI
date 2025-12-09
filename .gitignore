@@ -135,6 +135,12 @@ celerybeat.pid
 *.sage.py
 
 # Environments
+.env.local
+.env.*.local
+secrets.ini
+config.ini
+*.key
+*.pem
 .env
 .envrc
 .venv
