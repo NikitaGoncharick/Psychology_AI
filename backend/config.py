@@ -10,4 +10,5 @@ class Settings(BaseSettings):
         "env_file_encoding": "utf-8"
     }
 
-settings = Settings() # автоматически берёт из .env или окружения
+#settings = Settings() # автоматически берёт из .env или окружения
+settings = Settings()
