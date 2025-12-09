@@ -11,7 +11,7 @@
     .msg-ai   { background: var(--teal); color: white; border-radius: 18px 18px 18px 4px; max-width: 80%; }
     .msg-user { background: var(--teal-light); border-radius: 18px 18px 4px 18px; max-width: 80%; }
     .chat-card {
-      max-width: 936px;           /* было 720px → +30% = 936px */
+      max-width: 1024px;           /* было 720px → +30% = 936px */
       width: 100%;
       margin: 2rem auto;
       height: calc(100vh - 4rem);
@@ -20,6 +20,12 @@
       overflow: hidden;
       background: white;
     }
+
+    .chat-footer {
+    border-top: 1px solid #e9ecef;
+    background: white;
+    padding: 1.5rem;
+  }
 
     .input-message {
     height: 48px;
@@ -57,7 +63,7 @@
     <div class="msg-ai d-inline-block p-3"><i>печатает...</i></div>
   </div>
 
-  <div class="border-top bg-white p-4">
+  <div class="chat-footer">
 
    <!--обработчик, который передаёт текст в Python-функцию-->
    <!--hx-post просто перехватывает обычную отправку формы и делает её через AJAX вместо перезагрузки страницы-->
@@ -69,9 +75,7 @@
                autofocus required>
 
       <!--HTMX автоматически берёт все поля формы с атрибутом name и отправляет их, после тапа по кнопке с type="submit"-->
-        <button type="submit" class="btn btn-send">
-            →
-        </button>
+        <button type="submit" class="btn btn-send"> → </button>
       </div>
     </form>
   <!-- -->
