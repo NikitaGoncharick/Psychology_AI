@@ -5,6 +5,8 @@ from fastapi.responses import HTMLResponse
 from pyexpat.errors import messages
 from starlette.templating import Jinja2Templates
 
+from groq_api import groq_ai_answer
+
 app = FastAPI()
 templates = Jinja2Templates(directory="../frontend")
 
@@ -14,7 +16,8 @@ async def root(request: Request):
 
 @app.post("/send", response_class=HTMLResponse)
 async def send (request: Request, text: str = Form(...)):
-    reply = "Ваш ответ будет здесь" # ← потом Grok / RAG
+    #reply = "Ваш ответ будет здесь" # ← потом Grok / RAG
+    reply = await groq_ai_answer(text)
 
     return templates.TemplateResponse(
         "message.html",{"request": request, "user_text": text, "ai_reply": reply}
