@@ -1,15 +1,35 @@
 # main.py
+import asyncio
+
 import uvicorn
 from fastapi import FastAPI, Request, Form
 from fastapi.responses import HTMLResponse
 from pyexpat.errors import messages
 from starlette.templating import Jinja2Templates
+from sqlalchemy import text
 
 from groq_api import groq_ai_answer
+from database import Base, engine
 
+
+#####------
+#  Инициализация БД
+async def init_db():
+   try:
+       async with engine.begin() as conn: # 1. Открываем соединение
+           await conn.run_sync(Base.metadata.create_all)
+       print("✅ База данных подключена")
+       return True
+   except Exception as e:
+       print(f"❌ Ошибка подключения: {e}")
+       return False
+
+# 🚀 Запускаем создание таблиц при старте
+asyncio.run(init_db())
 app = FastAPI()
-templates = Jinja2Templates(directory="../frontend")
 
+templates = Jinja2Templates(directory="../frontend")
+#####------
 @app.get("/", response_class=HTMLResponse)
 async def root(request: Request):
     return templates.TemplateResponse("main_page.html", {"request": request})
