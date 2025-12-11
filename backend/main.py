@@ -1,21 +1,22 @@
 # main.py
 import asyncio
 from contextlib import asynccontextmanager
+from typing import Optional
 
 import uvicorn
 from fastapi import FastAPI, Request, Form, Depends, HTTPException
 from fastapi.responses import HTMLResponse
 from pydantic import ValidationError
 from sqlalchemy.ext.asyncio import AsyncSession
-from starlette.responses import JSONResponse
+from starlette.responses import JSONResponse, RedirectResponse
 from starlette.templating import Jinja2Templates
-
+from typing import Optional, Dict
 
 from groq_api import groq_ai_answer
 from database import engine, get_db
 from models import Base  # Base уже с зарегистрированными моделями
 from crud import UserCRUD, UserCreateSchema, UserLoginSchema
-from  auth import create_access_token
+from auth import create_access_token, decode_token
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -39,35 +40,51 @@ async def lifespan(app: FastAPI):
 
     print("👋 Приложение остановлено...")
 
-
 app = FastAPI(lifespan=lifespan)
 templates = Jinja2Templates(directory="../frontend")
 
+
+async def auth_check(request: Request) -> Optional[Dict]: # auth_payload может быть либо словарем (dict), либо None
+    token = request.cookies.get("access_token")
+    if not token:
+        return None
+
+    payload = decode_token(token)
+    if not payload:
+        return None
+
+    return payload
+
 @app.get("/", response_class=HTMLResponse)
-async def root(request: Request):
-    return templates.TemplateResponse("main_page.html", {"request": request})
+async def root(request: Request, auth_payload: Optional[Dict] = Depends(auth_check)):
+    print(auth_payload)
+    template_name = "main_page.html" if auth_payload else "login_page.html"
+    return templates.TemplateResponse(template_name, {"request": request})
 
 @app.post("/send", response_class=HTMLResponse)
 async def send (request: Request, text: str = Form(...)):
     #reply = "Ваш ответ будет здесь" # ← потом Grok / RAG
     reply = await groq_ai_answer(text)
 
-    return templates.TemplateResponse(
-        "message.html",{"request": request, "user_text": text, "ai_reply": reply}
-    )
+    return templates.TemplateResponse("message.html",{"request": request, "user_text": text, "ai_reply": reply})
 
 
 @app.get("/login")
 async def show_login_page(request: Request):
     return templates.TemplateResponse("login_page.html", {"request": request})
 
-@app.get("/auth_check")
-async def auth_check(request: Request):
+@app.get("/create_token")
+async def add_token(request: Request):
     auth = create_access_token(data={"sub": "name"})
     if auth:
-        return JSONResponse({"auth": auth})
+        data = RedirectResponse(url="/", status_code=303)
+        data.set_cookie(key="access_token", value=auth, httponly=True)
+        return data
 
     return JSONResponse({"ERRORauth": None})
+
+
+
 
 @app.post("/login")
 async def login_user(request: Request, db: AsyncSession = Depends(get_db), email: str = Form(...), password: str = Form(...)):
@@ -99,7 +116,7 @@ async def register_user(request: Request, db: AsyncSession = Depends(get_db), em
     if existing_user:
         raise HTTPException(status_code=400, detail="Email already registered")
 
-    # 3. Создаём пользователя
+    #3. Создаём пользователя
     new_user = await UserCRUD.create_new_user(db, user_data)
     return JSONResponse({"email": new_user.email, "id": new_user.id})
 
