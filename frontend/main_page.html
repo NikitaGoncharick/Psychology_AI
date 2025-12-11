@@ -22,7 +22,7 @@
 
     /* ХЕДЕР — теперь по той же ширине, что и блок чата */
     .top-header {
-      height: 80px;
+      height: 65px;
       background: rgba(255, 255, 255, 0.94);
       backdrop-filter: blur(12px);
       border-bottom: 1px solid #e0e0e0;
@@ -158,9 +158,8 @@
 
       <nav class="nav-links">
         <a href="#">Types of Therapy</a>
-        <a href="#">Topics</a>
-        <a href="#">Common Struggles</a>
-        <a href="#">Enterprise</a>
+        <a href="#">Price</a>
+        <a href="#">Contacts</a>
       </nav>
 
       <div class="header-right">
@@ -206,16 +205,16 @@
     <!-- чат -->
     <div class="chat-main d-flex flex-column">
 
-      <div class="border-bottom px-4 py-3 bg-white">
-        <h4 class="mb-1 fw-bold text-dark">Psychology AI</h4>
+      <div class="border-bottom px-4 py-1 bg-white">
+        <h5 class="mb-1 fw-bold text-dark">Psychology AI</h5>
         <small class="text-muted">A calm space to talk, whenever you need</small>
         <!--<span class="badge bg-success-subtle text-success-emphasis float-end mt-2">Gentle mode</span> -->
       </div>
 
-      <div id="messages" class="flex-grow-1 overflow-auto px-4 py-4" style="padding-bottom: 100px;"></div>
+      <div id="messages" class="flex-grow-1 overflow-auto px-4 py-4"></div>
 
-      <div id="typing" class="htmx-indicator px-4 pb-3">
-        <div class="msg-ai d-inline-block p-3"><i>печатает...</i></div>
+      <div id="typing" class="htmx-indicator px-4 pb-1">
+        <div class="msg-ai d-inline-block p-1"><i>печатает...</i></div>
       </div>
 
       <div class="chat-footer">
