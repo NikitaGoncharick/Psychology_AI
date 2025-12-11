@@ -12,6 +12,7 @@ from starlette.responses import JSONResponse, RedirectResponse
 from starlette.templating import Jinja2Templates
 from typing import Optional, Dict
 
+from config import settings
 from groq_api import groq_ai_answer
 from database import engine, get_db
 from models import Base  # Base уже с зарегистрированными моделями
@@ -43,7 +44,6 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 templates = Jinja2Templates(directory="../frontend")
 
-
 async def auth_check(request: Request) -> Optional[Dict]: # auth_payload может быть либо словарем (dict), либо None
     token = request.cookies.get("access_token")
     if not token:
@@ -55,13 +55,19 @@ async def auth_check(request: Request) -> Optional[Dict]: # auth_payload мож�
 
     return payload
 
-@app.get("/", response_class=HTMLResponse)
+async def create_token(user_email: str, redirect_url: str = '/'):
+    access_token = create_access_token(data={'sub': user_email})
+    response = RedirectResponse(url=redirect_url, status_code=303)
+    response.set_cookie("access_token", value=access_token, httponly=True, samesite='lax', secure=True, max_age=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60)
+    return response
+
+@app.get("/")
 async def root(request: Request, auth_payload: Optional[Dict] = Depends(auth_check)):
     print(auth_payload)
     template_name = "main_page.html" if auth_payload else "login_page.html"
     return templates.TemplateResponse(template_name, {"request": request})
 
-@app.post("/send", response_class=HTMLResponse)
+@app.post("/send")
 async def send (request: Request, text: str = Form(...)):
     #reply = "Ваш ответ будет здесь" # ← потом Grok / RAG
     reply = await groq_ai_answer(text)
@@ -73,31 +79,18 @@ async def send (request: Request, text: str = Form(...)):
 async def show_login_page(request: Request):
     return templates.TemplateResponse("login_page.html", {"request": request})
 
-@app.get("/create_token")
-async def add_token(request: Request):
-    auth = create_access_token(data={"sub": "name"})
-    if auth:
-        data = RedirectResponse(url="/", status_code=303)
-        data.set_cookie(key="access_token", value=auth, httponly=True)
-        return data
-
-    return JSONResponse({"ERRORauth": None})
-
-
-
-
 @app.post("/login")
 async def login_user(request: Request, db: AsyncSession = Depends(get_db), email: str = Form(...), password: str = Form(...)):
     try:
         user_data = UserLoginSchema(email=email, password=password)
     except ValidationError as e:
-        raise HTTPException(status_code=400, detail=e.message) from e
+        raise HTTPException(status_code=400, detail="Неверный email или пароль")
 
-    user = await UserCRUD.login_user(db, user_data)
-    if user:
-        return JSONResponse({"email": user.email, "id": user.id})
+    user = await UserCRUD.login_user(db, user_data) # ← должен возвращать User или None
+    if not user:
+        raise HTTPException(status_code=401, detail="Неверный email или пароль")
 
-    raise HTTPException(status_code=404, detail="User not found")
+    return await create_token(user_email=user.email)
 
 @app.get("/register")
 async def show_register_page(request: Request):
@@ -119,6 +112,10 @@ async def register_user(request: Request, db: AsyncSession = Depends(get_db), em
     #3. Создаём пользователя
     new_user = await UserCRUD.create_new_user(db, user_data)
     return JSONResponse({"email": new_user.email, "id": new_user.id})
+
+
+
+
 
 
 if __name__ == "__main__":
