@@ -1,7 +1,7 @@
 from typing import Optional
 
 from models import User
-from schemas import UserCreateSchema, UserSchema
+from schemas import UserCreateSchema, UserSchema, UserLoginSchema
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
@@ -23,8 +23,18 @@ class UserCRUD:
         db.add(new_user)
         await db.commit()
         await db.refresh(new_user)
-
         return new_user
+
+
+    @staticmethod
+    async def login_user(db: AsyncSession,  user_data: UserLoginSchema) -> Optional[User]:
+        result = await db.execute(select(User).where(User.email == user_data.email))
+        user = result.scalar_one_or_none()
+        if user and user.password == user_data.password:
+            return user
+
+        return None
+
 
     @staticmethod
     #Асинхронное получение пользователя по email
