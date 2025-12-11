@@ -56,19 +56,8 @@ async def send (request: Request, text: str = Form(...)):
     )
 
 
-@app.get("/get_user")
-async def get_user(email: str, db: AsyncSession = Depends(get_db)):
-    user = await UserCRUD.get_user_by_email(db, email)
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-
-    return{
-        "email": user.email,
-        "id": user.id
-    }
-
 @app.get("/login")
-async def login_page(request: Request):
+async def show_login_page(request: Request):
     return templates.TemplateResponse("login_page.html", {"request": request})
 
 @app.post("/login")
@@ -85,7 +74,7 @@ async def login_user(request: Request, db: AsyncSession = Depends(get_db), email
     raise HTTPException(status_code=404, detail="User not found")
 
 @app.get("/register")
-async def register_page(request: Request):
+async def show_register_page(request: Request):
     return templates.TemplateResponse("register_page.html", {"request": request})
 
 @app.post("/register")

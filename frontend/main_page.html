@@ -15,23 +15,95 @@
       --purple-dark: #6a6bc8;
     }
 
-    .msg-ai   { background: var(--teal); color: white; border-radius: 18px 18px 18px 4px; max-width: 80%; }
-    .msg-user { background: var(--teal-light); border-radius: 18px 18px 4px 18px; max-width: 80%; }
+    body {
+      background: #f5f7fa;
+      min-height: 100vh;
+    }
 
-    /* Единый монолитный контейнер */
+    /* ХЕДЕР — теперь по той же ширине, что и блок чата */
+    .top-header {
+      height: 80px;
+      background: rgba(255, 255, 255, 0.94);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid #e0e0e0;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+
+    .header-container {
+      max-width: 1280px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 0 3rem;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .logo {
+      font-size: 2rem;
+      font-weight: 800;
+      color: #111;
+      letter-spacing: -1.2px;
+    }
+
+    .nav-links a {
+      color: #333;
+      margin: 0 1.4rem;
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 1.02rem;
+    }
+
+    .nav-links a:hover {
+      color: var(--teal);
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 1.8rem;
+    }
+
+    .lang-select {
+      border: none;
+      background: transparent;
+      font-weight: 500;
+      color: #444;
+    }
+
+    .btn-get-started {
+      background: var(--teal);
+      color: white;
+      padding: 0.7rem 2rem;
+      border-radius: 50px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.3s;
+    }
+
+    .btn-get-started:hover {
+      background: #3a7a70;
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(74,144,134,0.25);
+    }
+
+    /* Монолитный блок чата + сайдбара */
     .chat-wrapper {
       max-width: 1280px;
       width: 100%;
       margin: 2rem auto;
-      height: calc(100vh - 4rem);
+      height: calc(100vh - 140px);
       background: white;
       border-radius: 20px;
       overflow: hidden;
-      box-shadow: 0 10px 40px rgba(0,0,0,0.09);
+      box-shadow: 0 12px 50px rgba(0,0,0,0.1);
       display: flex;
     }
 
-    /* Боковая панель */
+    /* Остальные стили — твои, без изменений */
     .sidebar {
       width: 260px;
       background: #f8fbff;
@@ -57,141 +129,116 @@
       font-weight: 600;
     }
 
-    .btn-log-in {
-      background: var( --purple-dark);
-      color: white;
-      border-radius:16px;
-      padding: 0.65rem;
-      font-weight: 500;
-    }
-
-    .btn-log-in:hover {
-      background: var(--purple-dark);
-    }
-
-    .btn-register {
-      background: var(--green);
-      color: white;
-      border-radius: 16px;
-      padding: 0.65rem;
-      font-weight: 500;
-    }
-
-    .btn-register:hover{
-         background: var(--green);
-    }
+    .btn-log-in, .btn-register { border-radius:16px; padding: 0.65rem; font-weight: 500; }
+    .btn-log-in { background: var(--purple-dark); color: white; }
+    .btn-register { background: var(--green); color: white; }
 
     .user-avatar {
-      width: 40px;
-      height: 40px;
-      background: var(--purple-dark);
-      color: white;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: bold;
-      font-size: 1.1rem;
+      width: 40px; height: 40px; background: var(--purple-dark); color: white;
+      border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      font-weight: bold; font-size: 1.1rem;
     }
 
-    .chat-main {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-    }
+    .chat-main { flex: 1; display: flex; flex-direction: column; }
+    .chat-footer { border-top: 1px solid #e9ecef; background: white; padding: 1.5rem; }
+    .input-message { height: 48px; border: 1px solid #ced4da; border-radius: 16px; }
+    .btn-send { background: var(--teal); color: white; width: 48px; height: 48px; border-radius: 12px; border: none; }
+    .btn-send:hover { background: #3a7a70; }
 
-    .chat-footer {
-      border-top: 1px solid #e9ecef;
-      background: white;
-      padding: 1.5rem;
-    }
-
-    .input-message {
-      height: 48px;
-      border: 1px solid #ced4da;
-      border-radius: 16px;
-    }
-
-    .btn-send {
-      background: var(--teal);
-      color: white;
-      width: 48px;
-      height: 48px;
-      border-radius: 12px;
-      border: none;
-    }
-
-    .btn-send:hover {
-      background: #3a7a70;
-    }
+    .msg-ai   { background: var(--teal); color: white; border-radius: 18px 18px 18px 4px; max-width: 80%; }
+    .msg-user { background: var(--teal-light); border-radius: 18px 18px 4px 18px; max-width: 80%; }
   </style>
 </head>
 <body class="bg-light">
 
-<!-- ЕДИНЫЙ БЕЛЫЙ БЛОК = боковая панель + чат -->
-<div class="chat-wrapper">
+  <!-- ХЕДЕР — теперь той же ширины, что и чат -->
+  <header class="top-header">
+    <div class="header-container">
+      <div class="logo">Aby</div>
 
-  <!-- Левая боковая панель — чистые классы, без инлайнов -->
-  <div class="sidebar">
-    <div>
-      <div class="text-center mb-5">
-        <div class="logo-circle">#</div>
-        <h5 class="mt-3">No name</h5>
+      <nav class="nav-links">
+        <a href="#">Types of Therapy</a>
+        <a href="#">Topics</a>
+        <a href="#">Common Struggles</a>
+        <a href="#">Enterprise</a>
+      </nav>
+
+      <div class="header-right">
+        <select class="lang-select">
+          <option>English</option>
+          <option>Русский</option>
+        </select>
+        <a href="/login" class="text-dark text-decoration-none fw-medium">Login</a>
+        <a href="/register" class="btn-get-started">Get Started</a>
       </div>
-
-      <button type="submit" onclick="window.location.href = '/login'" class="btn w-100 btn-log-in mb-4"> Sign In </button>
-
-      <button type="submit" onclick="window.location.href = '/register'" class="btn w-100 btn-register mb-4"> Register </button>
     </div>
+  </header>
 
-    <div class="d-flex align-items-center gap-3">
-      <div class="user-avatar">U</div>
+  <!-- Монолитный блок (чат + сайдбар) -->
+  <div class="chat-wrapper">
+
+    <!-- Левая боковая панель -->
+    <div class="sidebar">
       <div>
-        <div class="fw-medium">Guest User</div>
-        <small class="text-muted">Guest</small>
+        <div class="text-center mb-5">
+          <div class="logo-circle">#</div>
+          <h5 class="mt-3">No name</h5>
+        </div>
+
+        <button type="button" onclick="window.location.href='/login'" class="btn w-100 btn-log-in mb-3">
+          Sign In
+        </button>
+
+        <button type="button" onclick="window.location.href='/register'" class="btn w-100 btn-register mb-4">
+          Register
+        </button>
+      </div>
+
+      <div class="d-flex align-items-center gap-3">
+        <div class="user-avatar">U</div>
+        <div>
+          <div class="fw-medium">Guest User</div>
+          <small class="text-muted">Guest</small>
+        </div>
       </div>
     </div>
-  </div>
-  <!-- конец боковой панели -->
 
-  <!-- чат -->
-  <div class="chat-main d-flex flex-column">
+    <!-- чат -->
+    <div class="chat-main d-flex flex-column">
 
-    <div class="border-bottom px-4 py-3 bg-white">
-      <h4 class="mb-1 fw-bold text-dark">Psychology AI</h4>
-      <small class="text-muted">A calm space to talk, whenever you need</small>
-      <span class="badge bg-success-subtle text-success-emphasis float-end mt-2">Gentle mode</span>
-    </div>
+      <div class="border-bottom px-4 py-3 bg-white">
+        <h4 class="mb-1 fw-bold text-dark">Psychology AI</h4>
+        <small class="text-muted">A calm space to talk, whenever you need</small>
+        <span class="badge bg-success-subtle text-success-emphasis float-end mt-2">Gentle mode</span>
+      </div>
 
-    <div id="messages" class="flex-grow-1 overflow-auto px-4 py-4" style="padding-bottom: 100px;"></div>
+      <div id="messages" class="flex-grow-1 overflow-auto px-4 py-4" style="padding-bottom: 100px;"></div>
 
-    <div id="typing" class="htmx-indicator px-4 pb-3">
-      <div class="msg-ai d-inline-block p-3"><i>печатает...</i></div>
-    </div>
+      <div id="typing" class="htmx-indicator px-4 pb-3">
+        <div class="msg-ai d-inline-block p-3"><i>печатает...</i></div>
+      </div>
 
-    <div class="chat-footer">
+      <div class="chat-footer">
         <!--обработчик, который передаёт текст в Python-функцию-->
         <!--hx-post просто перехватывает обычную отправку формы и делает её через AJAX вместо перезагрузки страницы-->
-      <form hx-post="/send" hx-target="#messages" hx-swap="beforeend" hx-indicator="#typing">
-        <div class="input-group">
-          <input name="text" class="form-control shadow-sm input-message" placeholder="Share what's on your mind..." autofocus required>
+        <form hx-post="/send" hx-target="#messages" hx-swap="beforeend" hx-indicator="#typing">
+          <div class="input-group">
+            <input name="text" class="form-control shadow-sm input-message" placeholder="Share what's on your mind..." autofocus required>
+            <button type="submit" class="btn btn-send"> > </button>
+          </div>
+        </form>
 
-          <!--HTMX автоматически берёт все поля формы с атрибутом name и отправляет их, после тапа по кнопке с type="submit"-->
-          <button type="submit" class="btn btn-send"> > </button>
+        <div class="text-center mt-3">
+          <small class="text-muted">
+            This space is for reflection and support. It is not a substitute for emergency or crisis services.
+          </small>
         </div>
-      </form>
-
-      <div class="text-center mt-3">
-        <small class="text-muted">
-          This space is for reflection and support. It is not a substitute for emergency or crisis services.
-        </small>
       </div>
     </div>
-  </div>
-  <!-- конец чата -->
+    <!-- конец чата -->
 
-</div>
-<!-- конец монолитного блока -->
+  </div>
+  <!-- конец монолитного блока -->
 
 </body>
 </html>
