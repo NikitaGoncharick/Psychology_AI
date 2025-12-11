@@ -9,12 +9,17 @@ from sqlalchemy import select
 class UserCRUD:
     @staticmethod
     async def create_new_user(db: AsyncSession, user_data: UserCreateSchema) -> Optional[User]:
-        existing_user =db.query(User).filter(User.email == user_data.email).first()
+        # ← Асинхронная проверка на существование
+        result = await db.execute(select(User).where(User.email == user_data.email))
+        existing_user = result.scalar_one_or_none()
+
         if existing_user:
-            print("User already exists")
             return None
 
-        new_user = User(email=user_data.email, password=user_data.password, user_cash=user_data.user_cash)
+        new_user = User(
+            email=user_data.email,
+            password=user_data.password
+        )
         db.add(new_user)
         await db.commit()
         await db.refresh(new_user)
