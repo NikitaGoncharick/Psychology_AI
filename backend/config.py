@@ -4,6 +4,9 @@ from pydantic_settings import BaseSettings
 class Settings(BaseSettings):
     BOT_TOKEN: str
     GROQ_API_KEY: str
+    ALGORITHM: str
+    SECRET_KEY: str
+    ACCESS_TOKEN_EXPIRE_MINUTES: int
 
     model_config = {
         "env_file": ".env",

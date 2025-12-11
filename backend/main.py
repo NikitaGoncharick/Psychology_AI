@@ -15,6 +15,7 @@ from groq_api import groq_ai_answer
 from database import engine, get_db
 from models import Base  # Base уже с зарегистрированными моделями
 from crud import UserCRUD, UserCreateSchema, UserLoginSchema
+from  auth import create_access_token
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -59,6 +60,14 @@ async def send (request: Request, text: str = Form(...)):
 @app.get("/login")
 async def show_login_page(request: Request):
     return templates.TemplateResponse("login_page.html", {"request": request})
+
+@app.get("/auth_check")
+async def auth_check(request: Request):
+    auth = create_access_token(data={"sub": "name"})
+    if auth:
+        return JSONResponse({"auth": auth})
+
+    return JSONResponse({"ERRORauth": None})
 
 @app.post("/login")
 async def login_user(request: Request, db: AsyncSession = Depends(get_db), email: str = Form(...), password: str = Form(...)):
