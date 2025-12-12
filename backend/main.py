@@ -83,6 +83,17 @@ async def root(request: Request, auth_payload: Optional[Dict] = Depends(auth_che
 
     return templates.TemplateResponse("module_main_page.html", {"request": request, "header_template": header_template, "content_template": content_template})
 
+
+@app.get("/pricing")
+async def pricing_page(request: Request, auth_payload: Optional[Dict] = Depends(auth_check)):
+    if auth_payload:
+        header_template = "partials/header_user.html"
+        content_template = "partials/pricing.html"
+    else:
+        header_template = "partials/header_guest.html"
+        content_template = "partials/pricing.html"
+    return templates.TemplateResponse("module_main_page.html", {"request": request, "header_template": header_template, "content_template": content_template})
+
 @app.post("/send")
 async def send (request: Request, text: str = Form(...)):
     #reply = "Ваш ответ будет здесь" # ← потом Grok / RAG
@@ -130,9 +141,7 @@ async def register_user(request: Request, db: AsyncSession = Depends(get_db), em
     return JSONResponse({"email": new_user.email, "id": new_user.id})
 
 
-@app.get("/pricing")
-async def pricing_page(request: Request):
-    return templates.TemplateResponse("pricing_page.html", {"request": request})
+
 
 
 
