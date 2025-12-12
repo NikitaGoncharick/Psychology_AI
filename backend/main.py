@@ -3,10 +3,12 @@ import asyncio
 from contextlib import asynccontextmanager
 from typing import Optional
 
+import jinja2
 import uvicorn
 from fastapi import FastAPI, Request, Form, Depends, HTTPException
 from fastapi.responses import HTMLResponse
 from pydantic import ValidationError
+from sqlalchemy.dialects.mysql.mariadb import loader
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.responses import JSONResponse, RedirectResponse
 from starlette.templating import Jinja2Templates
@@ -42,7 +44,13 @@ async def lifespan(app: FastAPI):
     print("👋 Приложение остановлено...")
 
 app = FastAPI(lifespan=lifespan)
-templates = Jinja2Templates(directory="../frontend")
+templates = Jinja2Templates(
+    directory="../frontend",
+    loader=jinja2.ChoiceLoader([
+        jinja2.FileSystemLoader("../frontend"),
+        jinja2.FileSystemLoader("../frontend/partials"),
+    ])
+)
 
 async def auth_check(request: Request) -> Optional[Dict]: # auth_payload может быть либо словарем (dict), либо None
     token = request.cookies.get("access_token")
@@ -63,9 +71,17 @@ async def create_token(user_email: str, redirect_url: str = '/'):
 
 @app.get("/")
 async def root(request: Request, auth_payload: Optional[Dict] = Depends(auth_check)):
-    print(auth_payload)
-    template_name = "main_page.html" if auth_payload else "login_page.html"
-    return templates.TemplateResponse(template_name, {"request": request})
+    # template_name = "module_main_page.html" if auth_payload else "login_page.html"
+    # return templates.TemplateResponse(template_name, {"request": request})
+    if auth_payload:
+        # Залогинен → хедер юзера + чат
+        header_template = "partials/header_user.html"
+        content_template = "partials/user_chat.html"
+    else:
+        header_template = "partials/header_guest.html"
+        content_template = "partials/guest_chat.html"
+
+    return templates.TemplateResponse("module_main_page.html", {"request": request, "header_template": header_template, "content_template": content_template})
 
 @app.post("/send")
 async def send (request: Request, text: str = Form(...)):
@@ -114,7 +130,9 @@ async def register_user(request: Request, db: AsyncSession = Depends(get_db), em
     return JSONResponse({"email": new_user.email, "id": new_user.id})
 
 
-
+@app.get("/pricing")
+async def pricing_page(request: Request):
+    return templates.TemplateResponse("pricing_page.html", {"request": request})
 
 
 

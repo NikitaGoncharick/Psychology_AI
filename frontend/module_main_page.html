@@ -1,4 +1,3 @@
-<!-- ../frontend/main_page.html -->
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -6,7 +5,7 @@
   <title>Psychology AI</title>
   <script src="https://unpkg.com/htmx.org@2.0.0"></script>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <style>
+   <style>
     :root {
       --teal: #4a9086;
       --teal-light: #e8f4f3;
@@ -149,95 +148,13 @@
     .msg-user { background: var(--teal-light); border-radius: 18px 18px 4px 18px; max-width: 80%; }
   </style>
 </head>
-
 <body class="bg-light">
-  <!-- ХЕДЕР — теперь той же ширины, что и чат -->
-  <header class="top-header">
-    <div class="header-container">
-      <div class="logo">Aby</div>
 
-      <nav class="nav-links">
-        <a href="#">Types of Therapy</a>
-        <a href="/pricing">Price</a>
-        <a href="#">Contacts</a>
-      </nav>
+ <!-- Хедер подставляется динамически через Jinja -->
+  {% include header_template %}
 
-      <div class="header-right">
-        <select class="lang-select">
-          <option>English</option>
-          <option>Русский</option>
-        </select>
-        <a href="/login" class="text-dark text-decoration-none fw-medium">Login</a>
-        <a href="/register" class="btn-get-started">Get Started</a>
-      </div>
-    </div>
-  </header>
-
-  <!-- Монолитный блок (чат + сайдбар) -->
-  <div class="chat-wrapper">
-
-    <!-- Левая боковая панель -->
-    <div class="sidebar">
-      <div>
-        <div class="text-center mb-5">
-          <div class="logo-circle">#</div>
-          <h5 class="mt-3">No name</h5>
-        </div>
-
-       <!-- <button type="button" onclick="window.location.href='/login'" class="btn w-100 btn-log-in mb-3">
-          Sign In
-        </button>
-
-        <button type="button" onclick="window.location.href='/register'" class="btn w-100 btn-register mb-4">
-          Register
-        </button>  -->
-      </div>
-
-      <div class="d-flex align-items-center gap-3">
-        <div class="user-avatar">U</div>
-        <div>
-          <div class="fw-medium">Guest User</div>
-          <small class="text-muted">Guest</small>
-        </div>
-      </div>
-    </div>
-
-    <!-- чат -->
-    <div class="chat-main d-flex flex-column">
-
-      <div class="border-bottom px-4 py-1 bg-white">
-        <h5 class="mb-1 fw-bold text-dark">Psychology AI</h5>
-        <small class="text-muted">A calm space to talk, whenever you need</small>
-        <!--<span class="badge bg-success-subtle text-success-emphasis float-end mt-2">Gentle mode</span> -->
-      </div>
-
-      <div id="messages" class="flex-grow-1 overflow-auto px-4 py-4"></div>
-
-      <div id="typing" class="htmx-indicator px-4 pb-1">
-        <div class="msg-ai d-inline-block p-1"><i>печатает...</i></div>
-      </div>
-
-      <div class="chat-footer">
-        <!--обработчик, который передаёт текст в Python-функцию-->
-        <!--hx-post просто перехватывает обычную отправку формы и делает её через AJAX вместо перезагрузки страницы-->
-        <form hx-post="/send" hx-target="#messages" hx-swap="beforeend" hx-indicator="#typing">
-          <div class="input-group">
-            <input name="text" class="form-control shadow-sm input-message" placeholder="Share what's on your mind..." autofocus required>
-            <button type="submit" class="btn btn-send"> > </button>
-          </div>
-        </form>
-
-        <div class="text-center mt-3">
-          <small class="text-muted">
-            This space is for reflection and support. It is not a substitute for emergency or crisis services.
-          </small>
-        </div>
-      </div>
-    </div>
-    <!-- конец чата -->
-
-  </div>
-  <!-- конец монолитного блока -->
+  <!-- Контент подставляется динамически через Jinja -->
+  {% include content_template %}
 
 </body>
 </html>

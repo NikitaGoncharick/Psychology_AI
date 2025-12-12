@@ -1,0 +1,230 @@
+<!-- ../frontend/pricing_page.html -->
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <title>Выберите тариф — Psychology AI</title>
+  <script src="https://unpkg.com/htmx.org@2.0.0"></script>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --teal: #4a9086;
+      --teal-light: #e8f4f3;
+      --purple: #820ae4;
+      --green: #4a9086;
+      --purple-dark: #6a6bc8;
+    }
+
+    body {
+      background: #f5f7fa;
+      min-height: 100vh;
+    }
+
+    /* === ТОТ ЖЕ ХЕДЕР === */
+    .top-header {
+      height: 65px;
+      background: rgba(255, 255, 255, 0.94);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid #e0e0e0;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+
+    .header-container {
+      max-width: 1280px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 0 3rem;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .logo { font-size: 2rem; font-weight: 800; color: #111; letter-spacing: -1.2px; }
+    .nav-links a { color: #333; margin: 0 1.4rem; text-decoration: none; font-weight: 500; font-size: 1.02rem; }
+    .nav-links a:hover { color: var(--teal); }
+    .lang-select { border: none; background: transparent; font-weight: 500; color: #444; }
+    .btn-get-started {
+      background: var(--teal); color: white; padding: 0.7rem 2rem; border-radius: 50px;
+      font-weight: 600; text-decoration: none; transition: all 0.3s;
+    }
+    .btn-get-started:hover {
+      background: #3a7a70; transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(74,144,134,0.25);
+    }
+
+    /* === КОНТЕНТ ЦЕНЫ === */
+    .pricing-wrapper {
+      max-width: 1280px;
+      margin: 3rem auto;
+      padding: 0 3rem;
+    }
+
+    .pricing-card {
+      background: white;
+      border-radius: 20px;
+      padding: 2.5rem 2rem;
+      text-align: center;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.08);
+      transition: all 0.3s;
+      position: relative;
+      border: 2px solid transparent;
+    }
+
+    .pricing-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 20px 50px rgba(0,0,0,0.15);
+    }
+
+    .pricing-card.selected {
+      border-color: var(--teal);
+      box-shadow: 0 20px 60px rgba(74,144,134,0.2);
+    }
+
+    .selected-badge {
+      position: absolute;
+      top: -12px;
+      right: 20px;
+      background: var(--teal);
+      color: white;
+      padding: 6px 16px;
+      border-radius: 50px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    .price {
+      font-size: 2.2rem;
+      font-weight: 800;
+      color: #111;
+      margin: 1rem 0;
+    }
+
+    .price small {
+      font-size: 1rem;
+      font-weight: normal;
+      color: #666;
+    }
+
+    .discount-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 50px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+
+    .badge-orange { background: #fff3e0; color: #e65100; }
+    .badge-green  { background: #e8f5e9; color: #2e7d32; }
+
+    .trial-text {
+      color: var(--teal);
+      font-weight: 600;
+      margin: 1.5rem 0;
+    }
+
+    .btn-choose {
+      background: var(--teal);
+      color: white;
+      border: none;
+      padding: 0.9rem 2.5rem;
+      border-radius: 50px;
+      font-weight: 600;
+      font-size: 1.1rem;
+      margin-top: 1.5rem;
+      width: 100%;
+      transition: all 0.3s;
+    }
+
+    .btn-choose:hover {
+      background: #3a7a70;
+      transform: translateY(-2px);
+    }
+
+    .bottom-banner {
+      margin-top: 4rem;
+      background: white;
+      padding: 2rem;
+      border-radius: 20px;
+      text-align: center;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+      font-size: 1.3rem;
+      font-weight: 600;
+      color: #111;
+    }
+  </style>
+</head>
+<body class="bg-light">
+
+ <!-- ХЕДЕР — теперь той же ширины, что и чат -->
+  <header class="top-header">
+    <div class="header-container">
+      <div class="logo">Aby</div>
+
+      <nav class="nav-links">
+        <a href="#">Types of Therapy</a>
+        <a href="#">Price</a>
+        <a href="#">Contacts</a>
+      </nav>
+
+      <div class="header-right">
+        <select class="lang-select">
+          <option>English</option>
+          <option>Русский</option>
+        </select>
+        <a href="/login" class="text-dark text-decoration-none fw-medium">Login</a>
+        <a href="/register" class="btn-get-started">Get Started</a>
+      </div>
+    </div>
+  </header>
+  <div class="pricing-wrapper">
+    <h2 class="text-center mb-5 fw-bold" style="font-size: 2.4rem;">Choose Your Plan:</h2>
+
+    <div class="row g-5 justify-content-center">
+
+      <!-- Weekly -->
+      <div class="col-md-4">
+        <div class="pricing-card">
+          <h4 class="mb-4">Weekly</h4>
+          <div class="price">$3.99 <small>/week</small></div>
+          <button class="btn btn-choose">Choose Weekly</button>
+        </div>
+      </div>
+
+      <!-- Monthly -->
+      <div class="col-md-4">
+        <div class="pricing-card">
+          <h4 class="mb-4">Monthly</h4>
+          <span class="discount-badge badge-orange">14% OFF</span>
+          <div class="price">$3.74 <small>/week</small></div>
+          <p class="text-muted small">Billed monthly at $14.99</p>
+          <div class="trial-text">3-day trial for $1.00</div>
+          <button class="btn btn-choose">Choose Monthly</button>
+        </div>
+      </div>
+
+      <!-- Annual — выбран по умолчанию -->
+      <div class="col-md-4">
+        <div class="pricing-card selected position-relative">
+          <div class="selected-badge">Selected</div>
+          <h4 class="mb-4">Annual</h4>
+          <span class="discount-badge badge-green">57% OFF</span>
+          <div class="price">$1.72 <small>/week</small></div>
+          <p class="text-muted small">Billed yearly at $89.99</p>
+          <div class="trial-text">7-day trial for $1.00</div>
+          <button class="btn btn-choose">Choose Annual</button>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="bottom-banner">
+      Get started with a 7 day trial for $1.00!
+    </div>
+  </div>
+
+</body>
+</html>
