@@ -71,28 +71,28 @@ async def create_token(user_email: str, redirect_url: str = '/'):
 
 @app.get("/")
 async def root(request: Request, auth_payload: Optional[Dict] = Depends(auth_check)):
-    # template_name = "module_main_page.html" if auth_payload else "login_page.html"
+    # template_name = "main_page.html" if auth_payload else "login_page.html"
     # return templates.TemplateResponse(template_name, {"request": request})
     if auth_payload:
-        # Залогинен → хедер юзера + чат
         header_template = "partials/header_user.html"
         content_template = "partials/user_chat.html"
     else:
         header_template = "partials/header_guest.html"
         content_template = "partials/guest_chat.html"
 
-    return templates.TemplateResponse("module_main_page.html", {"request": request, "header_template": header_template, "content_template": content_template})
+    return templates.TemplateResponse("main_page.html", {"request": request, "header_template": header_template, "content_template": content_template})
 
 
 @app.get("/pricing")
-async def pricing_page(request: Request, auth_payload: Optional[Dict] = Depends(auth_check)):
+async def show_pricing_page(request: Request, auth_payload: Optional[Dict] = Depends(auth_check)):
     if auth_payload:
         header_template = "partials/header_user.html"
         content_template = "partials/pricing.html"
     else:
         header_template = "partials/header_guest.html"
         content_template = "partials/pricing.html"
-    return templates.TemplateResponse("module_main_page.html", {"request": request, "header_template": header_template, "content_template": content_template})
+
+    return templates.TemplateResponse("main_page.html", {"request": request, "header_template": header_template, "content_template": content_template})
 
 @app.post("/send")
 async def send (request: Request, text: str = Form(...)):

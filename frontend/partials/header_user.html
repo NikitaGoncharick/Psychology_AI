@@ -1,21 +1,142 @@
-<!-- ХЕДЕР — теперь той же ширины, что и чат -->
-  <header class="top-header">
-    <div class="header-container">
-      <div class="logo">Aby</div>
+<!-- Дополнительные стили для user-header -->
+<style>
+.top-header {
+  height: 65px;
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid #e0e0e0;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
 
-      <nav class="nav-links">
-        <a href="#">Types of Therapy</a>
-        <a href="/pricing">Price</a>
-        <a href="#">Contacts</a>
-      </nav>
+.header-container {
+  max-width: 1280px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 3rem;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
 
-      <div class="header-right">
-        <select class="lang-select">
-          <option>English</option>
-          <option>Русский</option>
-        </select>
-        <a href="/login" class="text-dark text-decoration-none fw-medium">Login</a>
-        <a href="/register" class="btn-get-started">Get Started</a>
+.logo {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #111;
+  letter-spacing: -1.2px;
+}
+
+.nav-links a {
+  color: #333;
+  margin: 0 1.4rem;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 1.02rem;
+  transition: color 0.2s;
+}
+
+.nav-links a:hover {
+  color: var(--teal, #4a9086);
+  text-decoration: none;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 1.8rem;
+}
+
+/* Стили для dropdown */
+.dropdown-toggle {
+  cursor: pointer;
+}
+
+.dropdown-toggle:hover {
+  background-color: #f8f9fa !important;
+}
+
+.dropdown-menu {
+  padding: 8px 0 !important;
+}
+
+.dropdown-item {
+  border-radius: 4px !important;
+  margin: 2px 8px !important;
+  transition: all 0.2s !important;
+}
+
+.dropdown-item:hover {
+  background-color: #f8fafc !important;
+}
+
+.dropdown-divider {
+  margin: 6px 0 !important;
+}
+</style>
+
+<header class="top-header">
+  <div class="header-container">
+    <div class="logo">Aby</div>
+
+    <nav class="nav-links">
+      <a href="/">AI-Chat</a>
+      <a href="/pricing">Pricing</a>
+      <a href="#">Contacts</a>
+    </nav>
+
+    <div class="header-right">
+      <!-- Bootstrap Dropdown -->
+      <div class="dropdown">
+        <a href="#"
+           class="d-flex align-items-center text-decoration-none dropdown-toggle px-3 py-2 rounded"
+           data-bs-toggle="dropdown"
+           aria-expanded="false"
+           style="transition: background-color 0.2s;">
+          <div class="user-avatar me-2  text-white rounded-circle d-flex align-items-center justify-content-center"
+               style="width: 36px; height: 36px; font-weight: bold; font-size: 16px;">
+            U
+          </div>
+          <span class="fw-medium text-dark">User</span>
+        </a>
+
+        <ul class="dropdown-menu dropdown-menu-end shadow"
+            style="min-width: 200px; margin-top: 10px; border-radius: 8px; border: 1px solid #e5e7eb;">
+          <!-- Информация о пользователе -->
+          <li class="px-3 py-2">
+            <small class="text-muted d-block">Signed in as</small>
+            <strong class="text-truncate d-block">user@example.com</strong>
+          </li>
+          <li><hr class="dropdown-divider my-2"></li>
+
+          <!-- Пункты меню -->
+          <li>
+            <a class="dropdown-item d-flex align-items-center py-2" href="/profile">
+              <i class="bi bi-person me-2"></i>Profile
+            </a>
+          </li>
+          <li>
+            <a class="dropdown-item d-flex align-items-center py-2" href="/settings">
+              <i class="bi bi-gear me-2"></i>Settings
+            </a>
+          </li>
+
+          <!-- Разделитель -->
+          <li><hr class="dropdown-divider my-2"></li>
+
+          <!-- Выход -->
+          <li>
+            <form action="/logout" method="POST" class="mb-0">
+              <button type="submit"
+                      class="dropdown-item d-flex align-items-center py-2 text-danger w-100 border-0 bg-transparent">
+                <i class="bi bi-box-arrow-right me-2"></i>Log Out
+              </button>
+            </form>
+          </li>
+        </ul>
       </div>
     </div>
-  </header>
+  </div>
+</header>
+

@@ -1,19 +1,56 @@
-<!-- ХЕДЕР — теперь той же ширины, что и чат -->
+<style>
+  .top-header {
+    height: 65px;
+    background: rgba(255, 255, 255, 0.94);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid #e0e0e0;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+  }
+
+  .header-container {
+    max-width: 1280px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 0 3rem;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .logo { font-size: 2rem; font-weight: 800; color: #111; letter-spacing: -1.2px; }
+  .nav-links a { color: #333; margin: 0 1.4rem; text-decoration: none; font-weight: 500; font-size: 1.02rem; }
+  .nav-links a:hover { color: var(--teal); }
+  .header-right { display: flex; align-items: center; gap: 1.8rem; }
+  .lang-select { border: none; background: transparent; font-weight: 500; color: #444; }
+  .btn-get-started {
+    background: var(--teal); color: white; padding: 0.7rem 2rem; border-radius: 50px;
+    font-weight: 600; text-decoration: none; transition: all 0.3s;
+  }
+  .btn-get-started:hover {
+    background: #3a7a70; transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(74,144,134,0.25);
+  }
+</style>
+
+<!-- ХЕДЕР  -->
   <header class="top-header">
     <div class="header-container">
       <div class="logo">Aby</div>
 
       <nav class="nav-links">
-        <a href="#">Types of Therapy</a>
-        <a href="/pricing">Price</a>
+        <a href="/">AI-Chat</a>
+        <a href="/pricing">Pricing</a>
         <a href="#">Contacts</a>
       </nav>
 
       <div class="header-right">
-        <select class="lang-select">
+        <!-- <select class="lang-select">
           <option>English</option>
           <option>Русский</option>
-        </select>
+        </select>-->
         <a href="/login" class="text-dark text-decoration-none fw-medium">Login</a>
         <a href="/register" class="btn-get-started">Get Started</a>
       </div>
