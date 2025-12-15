@@ -62,7 +62,12 @@ class ChatCRUD:
 
     @staticmethod  #Сохраняем сообщение пользователя
     async def add_message(db: AsyncSession,conversation_id: int, role:str, content: str) -> Message:
+        print(conversation_id, role, content)
         message = Message(conversation_id = conversation_id, role = role, content = content)
         db.add(message)
-        await db.refresh(message)
+
+        print("Диалог Добавлен")
         await db.commit()
+        await db.refresh(message)
+
+        return message

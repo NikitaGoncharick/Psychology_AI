@@ -94,16 +94,31 @@ async def show_pricing_page(request: Request, auth_payload: Optional[Dict] = Dep
     return templates.TemplateResponse("main_page.html", {"request": request, "header_template": header_template, "content_template": content_template})
 
 @app.post("/send")
-async def send (request: Request, db: AsyncSession = Depends(get_db) ,text: str = Form(...), auth_payload: Optional[Dict] = Depends(auth_check)):
+async def send (request: Request, db: AsyncSession = Depends(get_db), text: str = Form(...), auth_payload: Optional[Dict] = Depends(auth_check)):
     #reply = "Ваш ответ будет здесь" # ← потом Grok / RAG
+    # Проверка авторизации
     if not auth_payload:
         raise HTTPException(status_code=401, detail="Unauthorized")
 
+    # Получаем email из токена
     user_email = auth_payload.get("sub")
     if not user_email:
         raise HTTPException(status_code=401, detail="Uncorrect Token")
 
-    print(user_email)
+    # Находим пользователя по email
+    user = await UserCRUD.get_user_by_email(db, user_email)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    # Получаем или создаём активный чат
+    conversation = await ChatCRUD.get_or_create_conversation(db, user.id)
+    if not conversation:
+        raise HTTPException(status_code=404, detail="Conversation not found")
+
+    # Сохраняем сообщение пользователя
+    await ChatCRUD.add_message(db = db, conversation_id = conversation.id, role = "user", content= text)
+
+    print("Все корректно")
 
     reply = await groq_ai_answer(text)
 

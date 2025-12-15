@@ -29,6 +29,6 @@ class Message(Base):
     id:Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     role:Mapped[str] = mapped_column(String(255), nullable=False) # "user" или "assistant"
     content:Mapped[str] = mapped_column(Text, nullable=False)
-    conversation_id: Mapped[int] = mapped_column(Integer, ForeignKey('conversations.id'), nullable=False)
+    conversation_id: Mapped[int] = mapped_column(Integer, ForeignKey('conversations.id', ondelete='CASCADE'), nullable=False)
     # Связи
     conversation: Mapped[Conversation] = relationship("Conversation", back_populates="messages")
