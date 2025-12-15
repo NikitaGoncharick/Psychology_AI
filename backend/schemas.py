@@ -1,3 +1,5 @@
+from typing import Optional
+
 from pydantic import BaseModel, EmailStr, Field
 
 class UserSchema(BaseModel):
@@ -10,3 +12,8 @@ class UserCreateSchema(BaseModel):
 class UserLoginSchema(BaseModel):
     email: str
     password: str
+
+# Chat schemas
+class MessageCreate(BaseModel):
+    text: str
+    conversation_id: Optional[int] = None

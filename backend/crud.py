@@ -1,9 +1,10 @@
+import datetime
 from typing import Optional
 
-from models import User
+from models import User, Conversation, Message
 from schemas import UserCreateSchema, UserSchema, UserLoginSchema
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import select, update
 
 
 class UserCRUD:
@@ -35,10 +36,33 @@ class UserCRUD:
 
         return None
 
-
     @staticmethod
     #Асинхронное получение пользователя по email
     async def get_user_by_email(db: AsyncSession, email: str) -> Optional[User]:
         query = select(User).filter(User.email == email)
         result = await db.execute(query)
         return result.scalar_one_or_none()
+
+
+class ChatCRUD:
+    @staticmethod # Находим последний чат пользователя или создаем новый при первом запуске
+    async def get_or_create_conversation(db: AsyncSession, user_id:int) -> Optional[Conversation]:
+        result = await db.execute(select(Conversation).where(Conversation.user_id == user_id).order_by(Conversation.updated_at.desc()).limit(1))
+
+        conv = result.scalar_one_or_none()
+        if conv is None:
+            print("Чаты отсутствуют")
+            conv = Conversation(user_id=user_id, title="New Conversation")
+            db.add(conv)
+            await db.commit()
+            await db.refresh(conv)
+
+        print("Чат Уже Существует")
+        return conv
+
+    @staticmethod  #Сохраняем сообщение пользователя
+    async def add_message(db: AsyncSession,conversation_id: int, role:str, content: str) -> Message:
+        message = Message(conversation_id = conversation_id, role = role, content = content)
+        db.add(message)
+        await db.refresh(message)
+        await db.commit()

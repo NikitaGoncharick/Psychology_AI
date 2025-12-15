@@ -18,7 +18,7 @@ from config import settings
 from groq_api import groq_ai_answer
 from database import engine, get_db
 from models import Base  # Base уже с зарегистрированными моделями
-from crud import UserCRUD, UserCreateSchema, UserLoginSchema
+from crud import UserCRUD, UserCreateSchema, UserLoginSchema, ChatCRUD
 from auth import create_access_token, decode_token
 
 @asynccontextmanager
@@ -69,10 +69,9 @@ async def create_token(user_email: str, redirect_url: str = '/'):
     response.set_cookie("access_token", value=access_token, httponly=True, samesite='lax', secure=True, max_age=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60)
     return response
 
+
 @app.get("/")
 async def root(request: Request, auth_payload: Optional[Dict] = Depends(auth_check)):
-    # template_name = "main_page.html" if auth_payload else "login_page.html"
-    # return templates.TemplateResponse(template_name, {"request": request})
     if auth_payload:
         header_template = "partials/header_user.html"
         content_template = "partials/user_chat.html"
@@ -95,8 +94,17 @@ async def show_pricing_page(request: Request, auth_payload: Optional[Dict] = Dep
     return templates.TemplateResponse("main_page.html", {"request": request, "header_template": header_template, "content_template": content_template})
 
 @app.post("/send")
-async def send (request: Request, text: str = Form(...)):
+async def send (request: Request, db: AsyncSession = Depends(get_db) ,text: str = Form(...), auth_payload: Optional[Dict] = Depends(auth_check)):
     #reply = "Ваш ответ будет здесь" # ← потом Grok / RAG
+    if not auth_payload:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+
+    user_email = auth_payload.get("sub")
+    if not user_email:
+        raise HTTPException(status_code=401, detail="Uncorrect Token")
+
+    print(user_email)
+
     reply = await groq_ai_answer(text)
 
     return templates.TemplateResponse("message.html",{"request": request, "user_text": text, "ai_reply": reply})
