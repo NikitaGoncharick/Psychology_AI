@@ -1,5 +1,5 @@
 import datetime
-from typing import Optional
+from typing import Optional, List
 
 from models import User, Conversation, Message
 from schemas import UserCreateSchema, UserSchema, UserLoginSchema
@@ -60,7 +60,7 @@ class ChatCRUD:
         print("Чат Уже Существует")
         return conv
 
-    @staticmethod  #Сохраняем сообщение пользователя
+    @staticmethod  #Сохраняем сообщение в бд
     async def add_message(db: AsyncSession,conversation_id: int, role:str, content: str) -> Message:
         print(conversation_id, role, content)
         message = Message(conversation_id = conversation_id, role = role, content = content)
@@ -71,3 +71,10 @@ class ChatCRUD:
         await db.refresh(message)
 
         return message
+
+    @staticmethod
+    async def get_messages(db: AsyncSession, conversation:int) -> List[Message]:
+        result = await db.execute(select(Message).where(Message.conversation_id == conversation))
+        messages = result.scalars().all()
+
+        return messages
