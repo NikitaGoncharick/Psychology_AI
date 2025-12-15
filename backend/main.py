@@ -98,17 +98,17 @@ async def send (request: Request, db: AsyncSession = Depends(get_db), text: str 
     #reply = "Ваш ответ будет здесь" # ← потом Grok / RAG
     # Проверка авторизации
     if not auth_payload:
-        raise HTTPException(status_code=401, detail="Unauthorized")
+        return templates.TemplateResponse("login_page.html", {"request": request})
 
     # Получаем email из токена
     user_email = auth_payload.get("sub")
     if not user_email:
-        raise HTTPException(status_code=401, detail="Uncorrect Token")
+        return templates.TemplateResponse("login_page.html", {"request": request})
 
     # Находим пользователя по email
     user = await UserCRUD.get_user_by_email(db, user_email)
     if not user:
-        raise HTTPException(status_code=404, detail="User not found")
+        return templates.TemplateResponse("login_page.html", {"request": request})
 
     # Получаем или создаём активный чат
     conversation = await ChatCRUD.get_or_create_conversation(db, user.id)
@@ -118,9 +118,9 @@ async def send (request: Request, db: AsyncSession = Depends(get_db), text: str 
     # Сохраняем сообщение пользователя
     await ChatCRUD.add_message(db = db, conversation_id = conversation.id, role = "user", content= text)
 
-    print("Все корректно")
-
     reply = await groq_ai_answer(text)
+    # Сохраняем сообщение AI
+    await ChatCRUD.add_message(db = db, conversation_id = conversation.id, role = "assistant", content= reply)
 
     return templates.TemplateResponse("message.html",{"request": request, "user_text": text, "ai_reply": reply})
 
