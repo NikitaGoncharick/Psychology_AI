@@ -51,13 +51,12 @@ class ChatCRUD:
 
         conv = result.scalar_one_or_none()
         if conv is None:
-            print("Чаты отсутствуют")
+            print("Чаты отсутствуют, создаем новый")
             conv = Conversation(user_id=user_id, title="New Conversation")
             db.add(conv)
             await db.commit()
             await db.refresh(conv)
 
-        print("Чат Уже Существует")
         return conv
 
     @staticmethod  #Сохраняем сообщение в бд
@@ -91,3 +90,14 @@ class ChatCRUD:
         await db.commit()
         await db.refresh(conversation)
         return conversation
+
+    @staticmethod
+    async def get_conversation_data(db: AsyncSession, conversation_id:int) -> Optional[Conversation]:
+        result = await db.execute(select(Conversation).where(Conversation.user_id == conversation_id))
+        return result.scalar_one_or_none()
+
+    @staticmethod
+    async def is_conversation_owner(db: AsyncSession, conversation_id:int, user_id:int) -> bool:
+        result = await db.execute(select(Conversation).where(Conversation.id == conversation_id, Conversation.user_id == user_id))
+        conversation = result.scalar_one_or_none()
+        return conversation is not None

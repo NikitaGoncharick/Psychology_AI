@@ -19,20 +19,24 @@
         background: #555;
     }
 
-    /* Стили для чатов в боковой панели */
-    .chat-list {
-        max-height: calc(100vh - 200px);
-        overflow-y: auto;
-        padding-right: 5px;
+        /* Стили для чатов в боковой панели */
+        /* Форма чата */
+    .chat-list form {
+        display: block;
+        margin-bottom: 5px;
     }
 
+    /* Кнопка в виде чата */
     .chat-item {
         border-radius: 8px;
-        margin-bottom: 5px;
-        cursor: pointer;
-        transition: all 0.2s ease;
         padding: 10px 12px;
         border: 1px solid transparent;
+        background: transparent;
+        text-align: left;
+        width: 100%;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: block;
     }
 
     .chat-item:hover {
@@ -46,16 +50,10 @@
         font-weight: 500;
     }
 
-    .chat-title {
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        font-size: 0.9rem;
-        color: #333;
-    }
-
-    .chat-item.active .chat-title {
-        color: #007bff;
+    /* Убираем стандартные стили кнопки */
+    .chat-item:focus {
+        outline: none;
+        box-shadow: none;
     }
 
     .chat-time {
@@ -112,19 +110,22 @@
             <div class="chat-list">
                 {% if conversations %}
                     {% for conv in conversations %}
-                    <div class="chat-item {% if conv.id == active_conversation_id %}active{% endif %}"
-                         data-chat-id="{{ conv.id }}"
-                         title="{{ conv.title }}">
-                        <div class="chat-title">
-                            {{ conv.title }}
-                        </div>
-                        <div class="chat-time">
-                            {{ conv.updated_at.strftime('%H:%M') if conv.updated_at else 'Новый' }}
-                        </div>
-                    </div>
+                    <form action="/conversations/swith-chat" method="POST" class="d-block mb-1">
+                        <input type="hidden" name="chat_id" value="{{ conv.id }}">
+                        <button type="submit"
+                                class="chat-item w-100 {% if conv.id == active_conversation_id %}active{% endif %}"
+                                data-chat-id="{{ conv.id }}"
+                                title="{{ conv.title }}">
+                            <div class="chat-title">
+                                {{ conv.title }}
+                            </div>
+                            <div class="chat-time">
+                                {{ conv.updated_at.strftime('%H:%M') if conv.updated_at else 'Новый' }}
+                            </div>
+                        </button>
+                    </form>
                     {% endfor %}
                 {% else %}
-                    <!-- Если чатов нет -->
                     <div class="text-center py-4 text-muted">
                         <small>No chats yet. Start a new conversation!</small>
                     </div>

@@ -77,16 +77,25 @@ async def create_new_conversation(request: Request,auth_payload: Optional[Dict] 
 
     user_email = auth_payload.get("sub")
     user = await UserCRUD.get_user_by_email(db, user_email)
-
     new_conversation = await ChatCRUD.create_new_conversation(db, user.id)
 
-    # Получаем ВСЕ чаты пользователя после создания нового
-    all_conversations = await ChatCRUD.get_all_conversations(db, user.id)
-
-    # Перенаправляем на главную с указанием нового chat_id
     return RedirectResponse(url=f"/?chat_id={new_conversation.id}", status_code=303)
 
+@app.post("/conversations/swith-chat")
+async def swith_chat(request: Request, chat_id: int = Form(...), db: AsyncSession = Depends(get_db), auth_payload: Optional[Dict] = Depends(auth_check)):
+    if not auth_payload:
+        return RedirectResponse(url="/login", status_code=303)
 
+    user_email = auth_payload.get("sub")
+    user = await UserCRUD.get_user_by_email(db, user_email)
+
+    # Проверяем, что чат принадлежит пользователю
+    is_owner = await ChatCRUD.is_conversation_owner(db, chat_id, user.id)
+    if not is_owner:
+        return RedirectResponse(url="/", status_code=303)
+
+    print("Все Корректно")
+    return None
 
 @app.get("/")
 async def root(request: Request, auth_payload: Optional[Dict] = Depends(auth_check), db: AsyncSession = Depends(get_db)):
@@ -108,14 +117,11 @@ async def root(request: Request, auth_payload: Optional[Dict] = Depends(auth_che
         #     })
         # print(f"Conversation info: {conversation_info}")
 
-
         active_conversation = await ChatCRUD.get_or_create_conversation(db, user_data.id)
         messages = await ChatCRUD.get_messages(db, active_conversation.id)
 
 
-        return templates.TemplateResponse("main_page.html",{"request": request,
-                                                            "header_template": header_template,
-                                                            "content_template": content_template,
+        return templates.TemplateResponse("main_page.html",{"request": request, "header_template": header_template, "content_template": content_template,
                                                             "conversations": all_conversations, # ← передаем все чаты
                                                             "messages":messages # ← List сообщений с полями role и content активного чата
                                                             })
