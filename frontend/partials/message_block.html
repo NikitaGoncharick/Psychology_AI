@@ -1,11 +1,13 @@
 <!-- ../frontend/partials/message_block.html -->
 {% if role == "user" %}
+<!--Если user - Выравнивание сообщения справа. Стиль для блока msg-user прописан в main_page -->
 <div class="d-flex justify-content-end mb-3">
   <div class="msg-user p-3 word-break">
     {{ content }}
   </div>
 </div>
 {% elif role == "assistant" %}
+<!--Если assistant - Выравнивание сообщения слева. Стиль для блока msg-ai прописан в main_page -->
 <div class="d-flex justify-content-start mb-3">
   <div class="msg-ai p-3 word-break">
     {{ content }}

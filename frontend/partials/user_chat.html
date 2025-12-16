@@ -28,10 +28,13 @@
         <!--<span class="badge bg-success-subtle text-success-emphasis float-end mt-2">Gentle mode</span> -->
       </div>
 
+        <!--Jinja рендерит всю историю из БД один раз-->
+        <!--Jinja проходит по каждому сообщению из списка messages -->
       <div id="messages" class="flex-grow-1 overflow-auto px-4 py-4">
           {% for msg in messages %}
             {% set role = msg.role %}
             {% set content = msg.content %}
+            <!--Отправляем собранный пакет данных на рендер в message_block  -->
             {% include "partials/message_block.html" %}
           {% endfor %}
       </div>
@@ -43,7 +46,13 @@
       <div class="chat-footer">
         <!--обработчик, который передаёт текст в Python-функцию-->
         <!--hx-post просто перехватывает обычную отправку формы и делает её через AJAX вместо перезагрузки страницы-->
-        <form hx-post="/send" hx-target="#messages" hx-swap="beforeend" hx-indicator="#typing">
+        <!--hx-swap="beforeend" Отвечает за то, что бы кажддое новое сообщение было вставлено в конец переписки-->
+        <form
+                hx-post="/send"
+                hx-target="#messages"
+                hx-swap="beforeend"
+                hx-indicator="#typing">
+
           <div class="input-group">
             <input name="text" class="form-control shadow-sm input-message" placeholder="Share what's on your mind..." autofocus required>
             <button type="submit" class="btn btn-send"> > </button>

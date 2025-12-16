@@ -88,7 +88,8 @@ async def root(request: Request, auth_payload: Optional[Dict] = Depends(auth_che
         return templates.TemplateResponse("main_page.html",{"request": request,
                                                             "header_template": header_template,
                                                             "content_template": content_template,
-                                                            "messages":messages}) # ← вывод сообщений
+                                                            "messages":messages # ← List сообщений с полями role и content
+                                                            })
 
 
     else:
