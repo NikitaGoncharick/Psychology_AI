@@ -87,15 +87,26 @@ async def swith_chat(request: Request, chat_id: int = Form(...), db: AsyncSessio
         return RedirectResponse(url="/login", status_code=303)
 
     user_email = auth_payload.get("sub")
-    user = await UserCRUD.get_user_by_email(db, user_email)
+    user_data = await UserCRUD.get_user_by_email(db, user_email)
 
     # Проверяем, что чат принадлежит пользователю
-    is_owner = await ChatCRUD.is_conversation_owner(db, chat_id, user.id)
+    is_owner = await ChatCRUD.is_conversation_owner(db, chat_id, user_data.id)
     if not is_owner:
         return RedirectResponse(url="/", status_code=303)
 
-    print("Все Корректно")
-    return None
+    # Получаем ВСЕ чаты пользователя для сайдбара
+    all_conversations = await ChatCRUD.get_all_conversations(db, user_data.id)
+
+    # Получаем сообщения выбранного чата
+    messages = await ChatCRUD.get_messages(db, chat_id)
+    return templates.TemplateResponse("main_page.html", {"request": request,
+                                                         "header_template": "partials/header_user.html",
+                                                         "content_template": "partials/user_chat.html",
+                                                         "conversations": all_conversations,  # ← передаем все чаты
+                                                         "active_conversation_id": chat_id,
+                                                         "messages": messages # ← List сообщений с полями role и content активного чата
+                                                         })
+
 
 @app.get("/")
 async def root(request: Request, auth_payload: Optional[Dict] = Depends(auth_check), db: AsyncSession = Depends(get_db)):
@@ -106,6 +117,7 @@ async def root(request: Request, auth_payload: Optional[Dict] = Depends(auth_che
         user_email = auth_payload["sub"]
         user_data = await UserCRUD.get_user_by_email(db, user_email)
 
+        # Получаем все чаты пользователя
         all_conversations = await ChatCRUD.get_all_conversations(db, user_data.id)
         # conversation_info = []
         # for conv in all_conversations:
@@ -145,7 +157,7 @@ async def show_pricing_page(request: Request, auth_payload: Optional[Dict] = Dep
     return templates.TemplateResponse("main_page.html", {"request": request, "header_template": header_template, "content_template": content_template})
 
 @app.post("/send")
-async def send (request: Request, db: AsyncSession = Depends(get_db), text: str = Form(...), auth_payload: Optional[Dict] = Depends(auth_check)):
+async def send (request: Request, db: AsyncSession = Depends(get_db), text: str = Form(...), chat_id: int = Form(...), auth_payload: Optional[Dict] = Depends(auth_check)):
     #reply = "Ваш ответ будет здесь" # ← потом Grok / RAG
     # Проверка авторизации
     if not auth_payload:
@@ -161,17 +173,29 @@ async def send (request: Request, db: AsyncSession = Depends(get_db), text: str 
     if not user:
         return templates.TemplateResponse("login_page.html", {"request": request})
 
-    # Получаем или создаём активный чат
-    conversation = await ChatCRUD.get_or_create_conversation(db, user.id)
-    if not conversation:
-        raise HTTPException(status_code=404, detail="Conversation not found")
+    # Переменная для хранения ID чата
+    conversation_id_to_use = None
+    #--------------------------------------------------------------------------------
+
+    # Если передан chat_id, используем его, иначе последний чат
+    if chat_id:
+        is_owner = await ChatCRUD.is_conversation_owner(db, chat_id, user.id)
+        if is_owner:
+            conversation_id_to_use = chat_id
+        else:
+            conversation_id = await ChatCRUD.get_or_create_conversation(db, user.id)
+            conversation_id_to_use = conversation_id.id
+    else:
+        # Если chat_id не передан, берем последний чат
+        conversation = await ChatCRUD.get_or_create_conversation(db, user.id)
+        conversation_id_to_use = conversation.id
 
     # Сохраняем сообщение пользователя
-    await ChatCRUD.add_message(db = db, conversation_id = conversation.id, role = "user", content= text)
+    await ChatCRUD.add_message(db = db, conversation_id = conversation_id_to_use, role = "user", content= text)
 
     reply = await groq_ai_answer(text)
     # Сохраняем сообщение AI
-    await ChatCRUD.add_message(db = db, conversation_id = conversation.id, role = "assistant", content= reply)
+    await ChatCRUD.add_message(db = db, conversation_id = conversation_id_to_use, role = "assistant", content= reply)
 
     return templates.TemplateResponse("message.html",{"request": request, "user_text": text, "ai_reply": reply})
 

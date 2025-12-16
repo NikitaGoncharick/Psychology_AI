@@ -179,6 +179,9 @@
                 hx-swap="beforeend"
                 hx-indicator="#typing">
 
+            <!-- Добавляем скрытое поле с ID активного чата -->
+            <input type="hidden" name="chat_id" value="{{ active_conversation_id }}">
+
           <div class="input-group">
             <input name="text" class="form-control shadow-sm input-message" placeholder="Share what's on your mind..." autofocus required>
             <button type="submit" class="btn btn-send"> > </button>
