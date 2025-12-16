@@ -28,7 +28,13 @@
         <!--<span class="badge bg-success-subtle text-success-emphasis float-end mt-2">Gentle mode</span> -->
       </div>
 
-      <div id="messages" class="flex-grow-1 overflow-auto px-4 py-4"></div>
+      <div id="messages" class="flex-grow-1 overflow-auto px-4 py-4">
+          {% for msg in messages %}
+            {% set role = msg.role %}
+            {% set content = msg.content %}
+            {% include "partials/message_block.html" %}
+          {% endfor %}
+      </div>
 
       <div id="typing" class="htmx-indicator px-4 pb-1">
         <div class="msg-ai d-inline-block p-1"><i>печатает...</i></div>

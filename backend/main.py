@@ -8,6 +8,7 @@ import uvicorn
 from fastapi import FastAPI, Request, Form, Depends, HTTPException
 from fastapi.responses import HTMLResponse
 from pydantic import ValidationError
+from pyexpat.errors import messages
 from sqlalchemy.dialects.mysql.mariadb import loader
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.responses import JSONResponse, RedirectResponse
@@ -78,18 +79,25 @@ async def root(request: Request, auth_payload: Optional[Dict] = Depends(auth_che
 
         user_email = auth_payload["sub"]
         user_data = await UserCRUD.get_user_by_email(db, user_email)
-        conversation_data = await ChatCRUD.get_or_create_conversation(db, user_data.id)
 
+        conversation_data = await ChatCRUD.get_or_create_conversation(db, user_data.id)
         messages = await ChatCRUD.get_messages(db, conversation_data.id)
-        for message in messages:
-            print(f"[{message.role}]: {message.content}")
+        # for message in messages:
+        #     print(f"[{message.role}]: {message.content}")
+
+        return templates.TemplateResponse("main_page.html",{"request": request,
+                                                            "header_template": header_template,
+                                                            "content_template": content_template,
+                                                            "messages":messages}) # ← вывод сообщений
 
 
     else:
         header_template = "partials/header_guest.html"
         content_template = "partials/guest_chat.html"
+        return templates.TemplateResponse("main_page.html", {"request": request,
+                                                             "header_template": header_template,
+                                                             "content_template": content_template})
 
-    return templates.TemplateResponse("main_page.html", {"request": request, "header_template": header_template, "content_template": content_template})
 
 
 @app.get("/pricing")
