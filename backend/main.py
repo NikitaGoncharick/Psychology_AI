@@ -70,6 +70,23 @@ async def create_token(user_email: str, redirect_url: str = '/'):
     response.set_cookie("access_token", value=access_token, httponly=True, samesite='lax', secure=True, max_age=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60)
     return response
 
+@app.post("/conversations/new")
+async def create_new_conversation(request: Request,auth_payload: Optional[Dict] = Depends(auth_check), db: AsyncSession = Depends(get_db)):
+    if auth_payload is None:
+        return RedirectResponse(url="/login", status_code=303)
+
+    user_email = auth_payload.get("sub")
+    user = await UserCRUD.get_user_by_email(db, user_email)
+
+    new_conversation = await ChatCRUD.create_new_conversation(db, user.id)
+
+    # Получаем ВСЕ чаты пользователя после создания нового
+    all_conversations = await ChatCRUD.get_all_conversations(db, user.id)
+
+    # Перенаправляем на главную с указанием нового chat_id
+    return RedirectResponse(url=f"/?chat_id={new_conversation.id}", status_code=303)
+
+
 
 @app.get("/")
 async def root(request: Request, auth_payload: Optional[Dict] = Depends(auth_check), db: AsyncSession = Depends(get_db)):
@@ -100,7 +117,7 @@ async def root(request: Request, auth_payload: Optional[Dict] = Depends(auth_che
                                                             "header_template": header_template,
                                                             "content_template": content_template,
                                                             "conversations": all_conversations, # ← передаем все чаты
-                                                            "messages":messages # ← List сообщений с полями role и content
+                                                            "messages":messages # ← List сообщений с полями role и content активного чата
                                                             })
 
     else:
