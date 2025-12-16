@@ -78,3 +78,16 @@ class ChatCRUD:
         messages = result.scalars().all()
 
         return messages
+
+    @staticmethod
+    async def get_all_conversations(db: AsyncSession, user_id:int) -> List[Conversation]:
+        result = await db.execute(select(Conversation).where(Conversation.user_id == user_id))
+        return result.scalars().all()
+
+    @staticmethod
+    async def create_new_conversation(db: AsyncSession, user_id:int, title: str = "New Conversation") -> Optional[Conversation]:
+        conversation = Conversation(user_id = user_id, title = title)
+        db.add(conversation)
+        await db.commit()
+        await db.refresh(conversation)
+        return conversation

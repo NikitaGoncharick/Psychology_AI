@@ -1,22 +1,147 @@
-<div class="chat-wrapper">
+<style>
+    /* Добавьте в ваш CSS файл */
+    /* Стилизация скроллбара для боковой панели */
+    .sidebar::-webkit-scrollbar {
+        width: 6px;
+    }
 
+    .sidebar::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 10px;
+    }
+
+    .sidebar::-webkit-scrollbar-thumb {
+        background: #888;
+        border-radius: 10px;
+    }
+
+    .sidebar::-webkit-scrollbar-thumb:hover {
+        background: #555;
+    }
+
+    /* Стили для чатов в боковой панели */
+    .chat-list {
+        max-height: calc(100vh - 200px);
+        overflow-y: auto;
+        padding-right: 5px;
+    }
+
+    .chat-item {
+        border-radius: 8px;
+        margin-bottom: 5px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        padding: 10px 12px;
+        border: 1px solid transparent;
+    }
+
+    .chat-item:hover {
+        background-color: rgba(0, 123, 255, 0.08);
+        border-color: rgba(0, 123, 255, 0.2);
+    }
+
+    .chat-item.active {
+        background-color: rgba(0, 123, 255, 0.1);
+        border-left: 3px solid #007bff;
+        font-weight: 500;
+    }
+
+    .chat-title {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-size: 0.9rem;
+        color: #333;
+    }
+
+    .chat-item.active .chat-title {
+        color: #007bff;
+    }
+
+    .chat-time {
+        font-size: 0.75rem;
+        color: #6c757d;
+        margin-top: 2px;
+    }
+
+    /* Стиль для заголовка "All Chats" */
+    .chats-header {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 15px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #eee;
+    }
+
+    /* Кнопка нового чата */
+    .btn-new-chat {
+        background-color: #007bff;
+        color: white;
+        border: none;
+        padding: 10px 15px;
+        border-radius: 8px;
+        width: 100%;
+        font-weight: 500;
+        margin-bottom: 15px;
+        transition: all 0.3s ease;
+    }
+
+    .btn-new-chat:hover {
+        background-color: #0056b3;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0, 123, 255, 0.2);
+    }
+</style>
+
+<div class="chat-wrapper">
     <!-- Левая боковая панель -->
     <div class="sidebar">
-      <div>
-        <div class="text-center mb-5">
-          <div class="logo-circle">#</div>
-          <h5 class="mt-3">All Chats</h5>
+        <div>
+            <div class="text-center mb-4">
+                <div class="logo-circle">#</div>
+                <h5 class="mt-3">All Chats</h5>
+            </div>
+
+            <!-- Кнопка нового чата -->
+            <button type="button" class="btn-new-chat">
+                + New Chat
+            </button>
+
+            <!-- Список чатов -->
+            <div class="chat-list">
+                {% if conversations %}
+                    {% for conv in conversations %}
+                    <div class="chat-item {% if conv.id == active_conversation_id %}active{% endif %}"
+                         data-chat-id="{{ conv.id }}"
+                         title="{{ conv.title }}">
+                        <div class="chat-title">
+                            {{ conv.title }}
+                        </div>
+                        <div class="chat-time">
+                            {{ conv.updated_at.strftime('%H:%M') if conv.updated_at else 'Новый' }}
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <!-- Если чатов нет -->
+                    <div class="text-center py-4 text-muted">
+                        <small>No chats yet. Start a new conversation!</small>
+                    </div>
+                {% endif %}
+            </div>
         </div>
 
-       <!-- <button type="button" onclick="window.location.href='/login'" class="btn w-100 btn-log-in mb-3">
-          Sign In
-        </button>
-
-        <button type="button" onclick="window.location.href='/register'" class="btn w-100 btn-register mb-4">
-          Register
-        </button>  -->
-      </div>
-
+        <!-- Простая статистика -->
+        <div class="mt-3 pt-3 border-top">
+            <small class="text-muted">
+                {% if conversations %}
+                    Total: {{ conversations|length }} chat{{ 's' if conversations|length != 1 else '' }}
+                {% else %}
+                    No chats
+                {% endif %}
+            </small>
+        </div>
     </div>
 
     <!-- чат -->

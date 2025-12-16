@@ -19,8 +19,8 @@ class Conversation(Base):
     title:Mapped[str] = mapped_column(String(255), default='New Conversation')
     created_at:Mapped[datetime] = mapped_column(DateTime, server_default=func.now()) #При создании новой записи БД автоматически подставит текущее время
     updated_at:Mapped[datetime] = mapped_column(DateTime, server_default=func.now(), onupdate=func.now()) #автоматически обновит это поле текущим временем.
-    user_id:Mapped[int] = mapped_column(Integer, ForeignKey('users.id'), nullable=False)
     # Связи
+    user_id:Mapped[int] = mapped_column(Integer, ForeignKey('users.id'), nullable=False)
     user: Mapped[User] = relationship("User", back_populates="conversations")
     messages: Mapped[list["Message"]] = relationship("Message", back_populates="conversation", cascade="all, delete-orphan")
 

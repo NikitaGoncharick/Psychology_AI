@@ -80,24 +80,33 @@ async def root(request: Request, auth_payload: Optional[Dict] = Depends(auth_che
         user_email = auth_payload["sub"]
         user_data = await UserCRUD.get_user_by_email(db, user_email)
 
-        conversation_data = await ChatCRUD.get_or_create_conversation(db, user_data.id)
-        messages = await ChatCRUD.get_messages(db, conversation_data.id)
-        # for message in messages:
-        #     print(f"[{message.role}]: {message.content}")
+        all_conversations = await ChatCRUD.get_all_conversations(db, user_data.id)
+        # conversation_info = []
+        # for conv in all_conversations:
+        #     conversation_info.append({
+        #         "id": conv.id,
+        #         "title": conv.title,
+        #         "updated_at": conv.updated_at,
+        #         "created_at": conv.created_at,
+        #     })
+        # print(f"Conversation info: {conversation_info}")
+
+
+        active_conversation = await ChatCRUD.get_or_create_conversation(db, user_data.id)
+        messages = await ChatCRUD.get_messages(db, active_conversation.id)
+
 
         return templates.TemplateResponse("main_page.html",{"request": request,
                                                             "header_template": header_template,
                                                             "content_template": content_template,
+                                                            "conversations": all_conversations, # ← передаем все чаты
                                                             "messages":messages # ← List сообщений с полями role и content
                                                             })
-
 
     else:
         header_template = "partials/header_guest.html"
         content_template = "partials/guest_chat.html"
-        return templates.TemplateResponse("main_page.html", {"request": request,
-                                                             "header_template": header_template,
-                                                             "content_template": content_template})
+        return templates.TemplateResponse("main_page.html", {"request": request,"header_template": header_template,"content_template": content_template})
 
 
 
