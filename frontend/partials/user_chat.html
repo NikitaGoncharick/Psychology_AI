@@ -172,31 +172,40 @@
 
             <!-- Список чатов -->
             <div class="chat-list-container" style="max-height: 400px; overflow-y: auto; margin-bottom: 15px;">
-            <div class="chat-list">
-                {% if conversations %}
-                    {% for conv in conversations %}
-                    <form action="/conversations/swith-chat"
-                          method="POST"
-                          hx-post="/conversations/swith-chat"
-                          hx-target="#chat-container"
-                          hx-swap="innerHTML"
-                          hx-indicator="#loading-indicator">  <!-- опционально -->
+                <div class="chat-list">
+                    {% if conversations %}
+                        {% for conv in conversations %}
+                        <form action="/conversations/swith-chat"
+                              method="POST"
+                              hx-post="/conversations/swith-chat"
+                              hx-target="#chat-container"
+                              hx-swap="innerHTML"
+                              onclick='
+                                  // Убираем активный класс у всех чатов
+                                  document.querySelectorAll(".chat-item.active").forEach(el => el.classList.remove("active"));
+                                  // Добавляем активный класс текущему чату
+                                  this.querySelector(".chat-item").classList.add("active");
+                                  // Обновляем hidden field в форме отправки
+                                  const chatId = this.querySelector("input[name=\"chat_id\"]").value;
+                                  const messageField = document.querySelector("#chat-container input[name=\"chat_id\"]");
+                                  if (messageField) messageField.value = chatId;
+                              '>
 
-                        <input type="hidden" name="chat_id" value="{{ conv.id }}">
-                        <button type="submit"
-                                class="chat-item w-100 {% if conv.id == active_conversation_id %}active{% endif %}"
-                                title="{{ conv.title }}">
-                            <div class="chat-title">{{ conv.title }}</div>
-                        </button>
-                    </form>
-                    {% endfor %}
-                {% else %}
-                    <div class="text-center py-4 text-muted">
-                        <small>No chats yet. Start a new conversation!</small>
-                    </div>
-                {% endif %}
+                            <input type="hidden" name="chat_id" value="{{ conv.id }}">
+                            <button type="submit"
+                                    class="chat-item w-100 {% if conv.id == active_conversation_id %}active{% endif %}"
+                                    title="{{ conv.title }}">
+                                <div class="chat-title">{{ conv.title }}</div>
+                            </button>
+                        </form>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-4 text-muted">
+                            <small>No chats yet. Start a new conversation!</small>
+                        </div>
+                    {% endif %}
+                </div>
             </div>
-        </div>
         </div>
 
         <!-- Простая статистика -->
@@ -212,12 +221,10 @@
     </div>
 
     <!-- чат -->
-
     <div id="chat-container" class="flex-grow-1 d-flex flex-column"
          hx-target="this"
          hx-swap="innerHTML">
 
         {% include "partials/conversations.html" %}
     </div>
-
-  </div>
+</div>
