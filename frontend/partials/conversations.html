@@ -1,0 +1,50 @@
+<!-- templates/partials/conversations.html -->
+<div class="chat-main d-flex flex-column">
+
+      <div class="border-bottom px-4 py-1 bg-white">
+        <h5 class="mb-1 fw-bold text-dark">Psychology AI</h5>
+        <small class="text-muted">A calm space to talk, whenever you need</small>
+        <!--<span class="badge bg-success-subtle text-success-emphasis float-end mt-2">Gentle mode</span> -->
+      </div>
+
+        <!--Jinja рендерит всю историю из БД один раз-->
+        <!--Jinja проходит по каждому сообщению из списка messages -->
+      <div id="messages" class="flex-grow-1 overflow-auto px-4 py-4">
+          {% for msg in messages %}
+            {% set role = msg.role %}
+            {% set content = msg.content %}
+            <!--Отправляем собранный пакет данных на рендер в message_block  -->
+            {% include "partials/message_block.html" %}
+          {% endfor %}
+      </div>
+
+      <div id="typing" class="htmx-indicator px-4 pb-1">
+        <div class="msg-ai d-inline-block p-1"><i>печатает...</i></div>
+      </div>
+
+      <div class="chat-footer">
+        <!--обработчик, который передаёт текст в Python-функцию-->
+        <!--hx-post просто перехватывает обычную отправку формы и делает её через AJAX вместо перезагрузки страницы-->
+        <!--hx-swap="beforeend" Отвечает за то, что бы кажддое новое сообщение было вставлено в конец переписки-->
+        <form
+                hx-post="/send"
+                hx-target="#messages"
+                hx-swap="beforeend"
+                hx-indicator="#typing">
+
+            <!-- Добавляем скрытое поле с ID активного чата -->
+            <input type="hidden" name="chat_id" value="{{ active_conversation_id }}">
+
+          <div class="input-group">
+            <input name="text" class="form-control shadow-sm input-message" placeholder="Share what's on your mind..." autofocus required>
+            <button type="submit" class="btn btn-send"> > </button>
+          </div>
+        </form>
+
+        <div class="text-center mt-3">
+          <small class="text-muted">
+            This space is for reflection and support. It is not a substitute for emergency or crisis services.
+          </small>
+        </div>
+      </div>
+    </div>

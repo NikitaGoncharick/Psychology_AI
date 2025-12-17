@@ -19,8 +19,8 @@
         background: #555;
     }
 
-        /* Стили для чатов в боковой панели */
-        /* Форма чата */
+    /* Стили для чатов в боковой панели */
+    /* Форма чата */
     .chat-list form {
         display: block;
         margin-bottom: 5px;
@@ -90,9 +90,73 @@
         transform: translateY(-1px);
         box-shadow: 0 4px 8px rgba(0, 123, 255, 0.2);
     }
+
+    /* Контейнер для скролла чатов */
+    .chat-list-container {
+        max-height: calc(100vh - 280px); /* Адаптивная высота */
+        overflow-y: auto;
+        padding-right: 5px; /* Отступ для скроллбара */
+        margin-bottom: 15px;
+        flex: 1; /* Занимает все доступное пространство */
+    }
+
+    /* Кастомный скроллбар для контейнера чатов */
+    .chat-list-container::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .chat-list-container::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 10px;
+    }
+
+    .chat-list-container::-webkit-scrollbar-thumb {
+        background: #888;
+        border-radius: 10px;
+    }
+
+    .chat-list-container::-webkit-scrollbar-thumb:hover {
+        background: #555;
+    }
+
+        /* Критически важно для стабильной высоты при HTMX-свопе */
+    #chat-container {
+        height: 100%;
+        min-height: 0; /* обязательно для вложенных flex */
+    }
+
+    .chat-main {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+
+    #messages {
+        flex: 1 1 auto;     /* растягивается */
+        min-height: 0;      /* позволяет скроллиться внутри flex */
+        overflow-y: auto;
+    }
+
+    /* Чтобы футер не влиял на высоту */
+    .chat-footer {
+        flex-shrink: 0;
+    }
+
+    /* Для Firefox */
+    .chat-list-container {
+        scrollbar-width: thin;
+        scrollbar-color: #888 #f1f1f1;
+    }
+
+    /* Чтобы sidebar не имел собственного скролла */
+    .sidebar {
+        overflow-y: hidden;
+        display: flex;
+        flex-direction: column;
+    }
 </style>
 
-<div class="chat-wrapper">
+<div class="chat-wrapper d-flex">
     <!-- Левая боковая панель -->
     <div class="sidebar">
         <div>
@@ -107,21 +171,22 @@
             </form>
 
             <!-- Список чатов -->
+            <div class="chat-list-container" style="max-height: 400px; overflow-y: auto; margin-bottom: 15px;">
             <div class="chat-list">
                 {% if conversations %}
                     {% for conv in conversations %}
-                    <form action="/conversations/swith-chat" method="POST" class="d-block mb-1">
+                    <form action="/conversations/swith-chat"
+                          method="POST"
+                          hx-post="/conversations/swith-chat"
+                          hx-target="#chat-container"
+                          hx-swap="innerHTML"
+                          hx-indicator="#loading-indicator">  <!-- опционально -->
+
                         <input type="hidden" name="chat_id" value="{{ conv.id }}">
                         <button type="submit"
                                 class="chat-item w-100 {% if conv.id == active_conversation_id %}active{% endif %}"
-                                data-chat-id="{{ conv.id }}"
                                 title="{{ conv.title }}">
-                            <div class="chat-title">
-                                {{ conv.title }}
-                            </div>
-                            <div class="chat-time">
-                                {{ conv.updated_at.strftime('%H:%M') if conv.updated_at else 'Новый' }}
-                            </div>
+                            <div class="chat-title">{{ conv.title }}</div>
                         </button>
                     </form>
                     {% endfor %}
@@ -131,6 +196,7 @@
                     </div>
                 {% endif %}
             </div>
+        </div>
         </div>
 
         <!-- Простая статистика -->
@@ -146,56 +212,12 @@
     </div>
 
     <!-- чат -->
-    <div class="chat-main d-flex flex-column">
 
-      <div class="border-bottom px-4 py-1 bg-white">
-        <h5 class="mb-1 fw-bold text-dark">Psychology AI</h5>
-        <small class="text-muted">A calm space to talk, whenever you need</small>
-        <!--<span class="badge bg-success-subtle text-success-emphasis float-end mt-2">Gentle mode</span> -->
-      </div>
+    <div id="chat-container" class="flex-grow-1 d-flex flex-column"
+         hx-target="this"
+         hx-swap="innerHTML">
 
-        <!--Jinja рендерит всю историю из БД один раз-->
-        <!--Jinja проходит по каждому сообщению из списка messages -->
-      <div id="messages" class="flex-grow-1 overflow-auto px-4 py-4">
-          {% for msg in messages %}
-            {% set role = msg.role %}
-            {% set content = msg.content %}
-            <!--Отправляем собранный пакет данных на рендер в message_block  -->
-            {% include "partials/message_block.html" %}
-          {% endfor %}
-      </div>
-
-      <div id="typing" class="htmx-indicator px-4 pb-1">
-        <div class="msg-ai d-inline-block p-1"><i>печатает...</i></div>
-      </div>
-
-      <div class="chat-footer">
-        <!--обработчик, который передаёт текст в Python-функцию-->
-        <!--hx-post просто перехватывает обычную отправку формы и делает её через AJAX вместо перезагрузки страницы-->
-        <!--hx-swap="beforeend" Отвечает за то, что бы кажддое новое сообщение было вставлено в конец переписки-->
-        <form
-                hx-post="/send"
-                hx-target="#messages"
-                hx-swap="beforeend"
-                hx-indicator="#typing">
-
-            <!-- Добавляем скрытое поле с ID активного чата -->
-            <input type="hidden" name="chat_id" value="{{ active_conversation_id }}">
-
-          <div class="input-group">
-            <input name="text" class="form-control shadow-sm input-message" placeholder="Share what's on your mind..." autofocus required>
-            <button type="submit" class="btn btn-send"> > </button>
-          </div>
-        </form>
-
-        <div class="text-center mt-3">
-          <small class="text-muted">
-            This space is for reflection and support. It is not a substitute for emergency or crisis services.
-          </small>
-        </div>
-      </div>
+        {% include "partials/conversations.html" %}
     </div>
-    <!-- конец чата -->
 
   </div>
-  <!-- конец монолитного блока -->

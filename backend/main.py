@@ -94,19 +94,18 @@ async def swith_chat(request: Request, chat_id: int = Form(...), db: AsyncSessio
     if not is_owner:
         return RedirectResponse(url="/", status_code=303)
 
-    # Получаем ВСЕ чаты пользователя для сайдбара
-    all_conversations = await ChatCRUD.get_all_conversations(db, user_data.id)
-
     # Получаем сообщения выбранного чата
     messages = await ChatCRUD.get_messages(db, chat_id)
-    return templates.TemplateResponse("main_page.html", {"request": request,
-                                                         "header_template": "partials/header_user.html",
-                                                         "content_template": "partials/user_chat.html",
-                                                         "conversations": all_conversations,  # ← передаем все чаты
-                                                         "active_conversation_id": chat_id,
-                                                         "messages": messages # ← List сообщений с полями role и content активного чата
-                                                         })
 
+    # Возвращаем ТОЛЬКО блок чата (не всю страницу!)
+    return templates.TemplateResponse(
+        "partials/conversations.html",
+        {
+            "request": request,
+            "messages": messages,
+            "active_conversation_id": chat_id
+        }
+    )
 
 @app.get("/")
 async def root(request: Request, auth_payload: Optional[Dict] = Depends(auth_check), db: AsyncSession = Depends(get_db)):
@@ -186,7 +185,7 @@ async def send (request: Request, db: AsyncSession = Depends(get_db), text: str 
             conversation_id = await ChatCRUD.get_or_create_conversation(db, user.id)
             conversation_id_to_use = conversation_id.id
     else:
-        # Если chat_id не передан, берем последний чат
+        # Если chat_id не передан из htmx запроса, берем последний чат
         conversation = await ChatCRUD.get_or_create_conversation(db, user.id)
         conversation_id_to_use = conversation.id
 
