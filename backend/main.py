@@ -118,6 +118,17 @@ async def delete_conversation(request: Request, conversation_id: int = Form(...)
 
     return RedirectResponse(url="/", status_code=303)
 
+@app.post("/conversations/rename_conversation")
+async def rename_conversation(conversation_id: int = Form(...), new_name: str = Form(...), db: AsyncSession = Depends(get_db), auth_payload: Optional[Dict] = Depends(auth_check)):
+    if not auth_payload:
+        return RedirectResponse(url="/login", status_code=303)
+    user = await UserCRUD.get_user_by_email(db, auth_payload.get("sub"))
+    success = await ChatCRUD.rename_conversation(db, conversation_id, user.id, new_name)
+    if not success:
+        raise HTTPException(status_code=404, detail="Chat not found or access denied")
+
+    return RedirectResponse(url="/", status_code=303)
+
 @app.get("/")
 async def root(request: Request, auth_payload: Optional[Dict] = Depends(auth_check), db: AsyncSession = Depends(get_db)):
     if auth_payload:
