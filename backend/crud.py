@@ -103,8 +103,8 @@ class ChatCRUD:
         return conversation is not None
 
     @staticmethod
-    async def delete_conversation(db: AsyncSession, conversation_id:int) -> None:
-        result = await db.execute(select(Conversation).where(Conversation.id == conversation_id))
+    async def delete_conversation(db: AsyncSession, conversation_id:int, user_id: int) -> None:
+        result = await db.execute(select(Conversation).where(Conversation.id == conversation_id, Conversation.user_id == user_id))
         conversation = result.scalar_one_or_none()
 
         if not conversation:
@@ -114,3 +114,15 @@ class ChatCRUD:
         await db.commit()
 
         return True
+
+    @staticmethod
+    async def rename_conversation(db: AsyncSession, conversation_id:int, user_id: int, new_title:str) -> None:
+        result = await db.execute(select(Conversation).where(Conversation.id == conversation_id, Conversation.user_id == user_id))
+        conversation = result.scalar_one_or_none()
+        if conversation:
+            conversation.title = new_title
+            await db.commit()
+            await db.refresh(conversation)
+            return True
+
+        return False
