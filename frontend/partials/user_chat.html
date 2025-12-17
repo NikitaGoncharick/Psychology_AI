@@ -154,6 +154,76 @@
         display: flex;
         flex-direction: column;
     }
+
+        /* Кнопка троеточия в чате */
+    .chat-menu-btn {
+        opacity: 0;               /* Скрыта по умолчанию */
+        transition: opacity 0.2s ease;
+        padding-left: 10px;       /* Отступ от названия */
+        flex-shrink: 0;           /* Не сжимается */
+        color: #6c757d;           /* Серый цвет, как в типичных UI */
+    }
+
+    /* Показываем троеточие при ховере над чатом или когда чат активный */
+    .chat-item:hover .chat-menu-btn,
+    .chat-item.active .chat-menu-btn {
+        opacity: 1;
+    }
+
+    /* При ховере над самим троеточием — немного темнее */
+    .chat-menu-btn:hover {
+        color: #495057;
+        cursor: pointer;
+    }
+
+    /* Чтобы название чата не растягивалось на всю ширину при длинном тексте */
+    .chat-title {
+        flex: 1;
+        min-width: 0;             /* Важно для text-truncate внутри flex */
+    }
+
+        /* Контейнер формы — relative, чтобы позиционировать троеточие абсолютно */
+    .chat-list form {
+        position: relative;
+        display: block;
+        margin-bottom: 5px;
+    }
+
+    /* Плейсхолдер, чтобы название чата не тянулось под троеточие */
+    .chat-menu-placeholder {
+        width: 32px;     /* Ширина кнопки троеточия + отступы */
+        flex-shrink: 0;
+    }
+
+    /* Сама кнопка троеточия — абсолютно позиционирована справа */
+    .chat-menu-btn {
+        position: absolute;
+        top: 0;
+        right: 0;
+        height: 100%;
+        width: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: none;
+        border: none;
+        opacity: 0;
+        transition: opacity 0.2s ease, background-color 0.2s ease;
+        color: #6c757d;
+        border-radius: 0 8px 8px 0;  /* Скругление только справа, как у чата */
+    }
+
+    /* Показываем при ховере над формой или активным чатом */
+    .chat-list form:hover .chat-menu-btn,
+    .chat-item.active ~ .chat-menu-btn {
+        opacity: 1;
+    }
+
+    /* Ховер-эффект на троеточии */
+    .chat-menu-btn:hover {
+        background-color: rgba(0, 0, 0, 0.05);
+        color: #495057;
+    }
 </style>
 
 <div class="chat-wrapper d-flex">
@@ -181,21 +251,35 @@
                               hx-target="#chat-container"
                               hx-swap="innerHTML"
                               onclick='
-                                  // Убираем активный класс у всех чатов
                                   document.querySelectorAll(".chat-item.active").forEach(el => el.classList.remove("active"));
-                                  // Добавляем активный класс текущему чату
                                   this.querySelector(".chat-item").classList.add("active");
-                                  // Обновляем hidden field в форме отправки
                                   const chatId = this.querySelector("input[name=\"chat_id\"]").value;
                                   const messageField = document.querySelector("#chat-container input[name=\"chat_id\"]");
                                   if (messageField) messageField.value = chatId;
                               '>
 
                             <input type="hidden" name="chat_id" value="{{ conv.id }}">
+
+                            <!-- Кнопка переключения чата (всё кроме троеточия) -->
                             <button type="submit"
                                     class="chat-item w-100 {% if conv.id == active_conversation_id %}active{% endif %}"
                                     title="{{ conv.title }}">
-                                <div class="chat-title">{{ conv.title }}</div>
+                                <div class="d-flex justify-content-between align-items-center w-100">
+                                    <div class="chat-title text-truncate">{{ conv.title }}</div>
+
+                                    <!-- Пустое место под троеточие, чтобы название не растягивалось до конца -->
+                                    <div class="chat-menu-placeholder"></div>
+                                </div>
+                            </button>
+
+                            <!-- Отдельная кнопка троеточия (поверх всего, не влияет на submit) -->
+                            <button type="button"
+                                    class="chat-menu-btn"
+                                    data-chat-id="{{ conv.id }}"
+                                    title="Меню чата">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                    <path d="M9.5 13a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0"/>
+                                </svg>
                             </button>
                         </form>
                         {% endfor %}
