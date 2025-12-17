@@ -121,10 +121,9 @@
     }
 
     /* Выпадающее меню троеточия */
+  /* Выпадающее меню троеточия */
     .chat-dropdown {
-        position: absolute;
-        top: calc(100% + 6px);
-        right: 0;
+        position: fixed; /* Важное изменение: fixed вместо absolute */
         background: white;
         border: 1px solid #e0e0e0;
         border-radius: 8px;
@@ -394,11 +393,12 @@
 
     // Закрываем все открытые меню при клике вне их
     document.addEventListener('click', function(e) {
-        document.querySelectorAll('.chat-dropdown').forEach(menu => {
-            if (!menu.parentElement.contains(e.target)) {
-                menu.remove();
-            }
-        });
+        const dropdown = document.querySelector('.chat-dropdown');
+        const btn = e.target.closest('.chat-menu-btn');
+
+        if (dropdown && !dropdown.contains(e.target) && !btn) {
+            dropdown.remove();
+        }
     });
 
     // Основная функция открытия меню троеточия
@@ -413,18 +413,23 @@
         const form = btn.closest('form');
 
         // Удаляем старое меню
-        const existingMenu = form.querySelector('.chat-dropdown');
+        const existingMenu = document.querySelector('.chat-dropdown');
         if (existingMenu) {
             existingMenu.remove();
             return;
         }
 
-        // Удаляем другие меню
-        document.querySelectorAll('.chat-dropdown').forEach(menu => menu.remove());
+        // Получаем координаты кнопки
+        const rect = btn.getBoundingClientRect();
 
         // Создаём новое меню
         const menu = document.createElement('div');
         menu.className = 'chat-dropdown';
+
+        // Позиционируем относительно кнопки
+        menu.style.top = (rect.bottom + 6) + 'px';
+        menu.style.right = (window.innerWidth - rect.right) + 'px';
+
         menu.innerHTML = `
             <div class="dropdown-item" data-action="rename" data-chat-id="${chatId}">
                 <i class="dropdown-icon icon-pencil"></i>
@@ -436,7 +441,17 @@
             </div>
         `;
 
-        form.appendChild(menu);
+        // Добавляем в body, а не в форму
+        document.body.appendChild(menu);
+
+        // Проверяем, не выходит ли меню за нижний край экрана
+        setTimeout(() => {
+            const menuRect = menu.getBoundingClientRect();
+            if (menuRect.bottom > window.innerHeight) {
+                // Если выходит, показываем сверху
+                menu.style.top = (rect.top - menuRect.height - 6) + 'px';
+            }
+        }, 0);
 
         // Обработка кликов по пунктам меню
         menu.querySelectorAll('.dropdown-item').forEach(item => {
@@ -445,7 +460,7 @@
 
                 const action = this.dataset.action;
                 const id = this.dataset.chatId;
-                const chatForm = this.closest('form');
+                const chatForm = document.querySelector(`form input[name="chat_id"][value="${id}"]`)?.closest('form');
 
                 // Сохраняем данные для модалки
                 currentAction = action;
@@ -457,7 +472,7 @@
                     document.getElementById('modal-message').textContent = 'Enter a new name for this chat:';
                     const input = document.getElementById('modal-rename-input');
                     input.style.display = 'block';
-                    input.value = chatForm.querySelector('.chat-title').textContent.trim();
+                    input.value = chatForm ? chatForm.querySelector('.chat-title').textContent.trim() : '';
                     input.focus();
                     input.select();
 
