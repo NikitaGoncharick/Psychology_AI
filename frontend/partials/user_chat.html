@@ -35,7 +35,7 @@
         text-align: left;
         width: 100%;
         cursor: pointer;
-        transition: all 0.2s ease;
+        transition: all 0.05s ease;
         display: block;
     }
 
@@ -175,9 +175,9 @@
                 <div class="chat-list">
                     {% if conversations %}
                         {% for conv in conversations %}
-                        <form action="/conversations/swith-chat"
+                        <form action="/conversations/switch-chat"
                               method="POST"
-                              hx-post="/conversations/swith-chat"
+                              hx-post="/conversations/switch-chat"
                               hx-target="#chat-container"
                               hx-swap="innerHTML"
                               onclick='

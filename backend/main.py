@@ -81,8 +81,8 @@ async def create_new_conversation(request: Request,auth_payload: Optional[Dict] 
 
     return RedirectResponse(url=f"/?chat_id={new_conversation.id}", status_code=303)
 
-@app.post("/conversations/swith-chat")
-async def swith_chat(request: Request, chat_id: int = Form(...), db: AsyncSession = Depends(get_db), auth_payload: Optional[Dict] = Depends(auth_check)):
+@app.post("/conversations/switch-chat")
+async def switch_chat(request: Request, chat_id: int = Form(...), db: AsyncSession = Depends(get_db), auth_payload: Optional[Dict] = Depends(auth_check)):
     if not auth_payload:
         return RedirectResponse(url="/login", status_code=303)
 

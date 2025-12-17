@@ -101,3 +101,8 @@ class ChatCRUD:
         result = await db.execute(select(Conversation).where(Conversation.id == conversation_id, Conversation.user_id == user_id))
         conversation = result.scalar_one_or_none()
         return conversation is not None
+
+    @staticmethod
+    async def delete_conversation(db: AsyncSession, conversation_id:int) -> None:
+        result = await db.execute(select(Conversation).where(Conversation.user_id == conversation_id))
+        conversation = result.scalar_one_or_none()
