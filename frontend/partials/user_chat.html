@@ -226,7 +226,6 @@
     }
 
     /* Выпадающее меню при клике на троеточие */
-    /* Выпадающее меню — исправленная версия */
         .chat-dropdown {
             position: absolute;
             top: calc(100% + 6px);        /* небольшой отступ вниз от чата */
@@ -270,6 +269,28 @@
         .dropdown-item svg {
             margin-right: 10px;
             flex-shrink: 0;
+        }
+        /* Базовый стиль для иконок в меню */
+        .dropdown-icon {
+            width: 14px;
+            height: 14px;
+            display: inline-block;
+            background-color: currentColor;   /* цвет от текста */
+            mask-size: contain;
+            mask-repeat: no-repeat;
+            mask-position: center;
+            margin-right: 10px;
+            flex-shrink: 0;
+        }
+
+        /* Иконка карандаша (Rename) */
+        .icon-pencil {
+            mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23000'%3E%3Cpath d='M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106L5.5 12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.293z'/%3E%3C/svg%3E");
+        }
+
+        /* Иконка корзины (Delete) */
+        .icon-trash {
+            mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23000'%3E%3Cpath d='M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z'/%3E%3Cpath d='M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3h11V2h-11v1z'/%3E%3C/svg%3E");
         }
 </style>
 
@@ -397,16 +418,11 @@
         menu.className = 'chat-dropdown';
         menu.innerHTML = `
             <div class="dropdown-item" data-action="rename" data-chat-id="${chatId}">
-                <svg width="14" height="14" fill="currentColor" viewBox="0 0 16 16" style="margin-right: 8px;">
-                    <path d="M12.146 0.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106L5.5 12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.293z"/>
-                </svg>
+                <i class="dropdown-icon icon-pencil"></i>
                 Rename
             </div>
             <div class="dropdown-item" data-action="delete" data-chat-id="${chatId}">
-                <svg width="14" height="14" fill="currentColor" viewBox="0 0 16 16" style="margin-right: 8px;">
-                    <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
-                    <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3h11V2h-11v1z"/>
-                </svg>
+                <i class="dropdown-icon icon-trash"></i>
                 Delete
             </div>
         `;
