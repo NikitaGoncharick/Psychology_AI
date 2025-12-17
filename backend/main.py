@@ -109,7 +109,11 @@ async def switch_chat(request: Request, chat_id: int = Form(...), db: AsyncSessi
 
 @app.post("/conversations/delete")
 async def delete_conversation(request: Request, conversation_id: int = Form(...), db: AsyncSession = Depends(get_db)):
-    print("ID чата = ", conversation_id)
+    success = await ChatCRUD.delete_conversation(db, conversation_id)
+    if not success:
+        raise HTTPException(status_code=404, detail="Chat not found or access denied")
+
+    return RedirectResponse(url="/", status_code=303)
 
 @app.get("/")
 async def root(request: Request, auth_payload: Optional[Dict] = Depends(auth_check), db: AsyncSession = Depends(get_db)):

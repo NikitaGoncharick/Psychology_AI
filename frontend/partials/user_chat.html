@@ -563,7 +563,7 @@
                 target: '.chat-list',
                 swap: 'outerHTML'
             }).then(() => {
-                console.log('Чат удалён:', chatId);
+                window.location.reload();
             });
 
             // Скрываем модалку

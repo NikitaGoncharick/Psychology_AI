@@ -104,5 +104,13 @@ class ChatCRUD:
 
     @staticmethod
     async def delete_conversation(db: AsyncSession, conversation_id:int) -> None:
-        result = await db.execute(select(Conversation).where(Conversation.user_id == conversation_id))
+        result = await db.execute(select(Conversation).where(Conversation.id == conversation_id))
         conversation = result.scalar_one_or_none()
+
+        if not conversation:
+            return False
+
+        await db.delete(conversation)
+        await db.commit()
+
+        return True
