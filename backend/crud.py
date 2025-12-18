@@ -80,7 +80,7 @@ class ChatCRUD:
 
     @staticmethod
     async def get_all_conversations(db: AsyncSession, user_id:int) -> List[Conversation]:
-        result = await db.execute(select(Conversation).where(Conversation.user_id == user_id))
+        result = await db.execute(select(Conversation).where(Conversation.user_id == user_id).order_by(Conversation.updated_at.desc()))
         return result.scalars().all()
 
     @staticmethod

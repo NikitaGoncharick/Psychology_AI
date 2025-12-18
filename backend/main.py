@@ -130,34 +130,29 @@ async def rename_conversation(conversation_id: int = Form(...), new_name: str = 
     return RedirectResponse(url="/", status_code=303)
 
 @app.get("/")
-async def root(request: Request, auth_payload: Optional[Dict] = Depends(auth_check), db: AsyncSession = Depends(get_db)):
+async def root(request: Request, active_chat_id: Optional[int] = None, auth_payload: Optional[Dict] = Depends(auth_check), db: AsyncSession = Depends(get_db)):
     if auth_payload:
         header_template = "partials/header_user.html"
         content_template = "partials/user_chat.html"
 
         user_email = auth_payload["sub"]
         user_data = await UserCRUD.get_user_by_email(db, user_email)
+        all_conversations = await ChatCRUD.get_all_conversations(db, user_data.id) # Получаем все чаты пользователя
 
-        # Получаем все чаты пользователя
-        all_conversations = await ChatCRUD.get_all_conversations(db, user_data.id)
-        # conversation_info = []
-        # for conv in all_conversations:
-        #     conversation_info.append({
-        #         "id": conv.id,
-        #         "title": conv.title,
-        #         "updated_at": conv.updated_at,
-        #         "created_at": conv.created_at,
-        #     })
-        # print(f"Conversation info: {conversation_info}")
-
-        active_conversation = await ChatCRUD.get_or_create_conversation(db, user_data.id)
-        messages = await ChatCRUD.get_messages(db, active_conversation.id)
+        if active_chat_id:
+            if await ChatCRUD.delete_conversation(db, active_chat_id, user_data.id):
+                active_conversation = await ChatCRUD.get_conversation_data(db, active_chat_id)
+                messages = await ChatCRUD.get_messages(db, active_chat_id)
+        else:
+                active_conversation = await ChatCRUD.get_or_create_conversation(db, user_data.id)
+                messages = await ChatCRUD.get_messages(db, active_conversation.id)
 
 
         return templates.TemplateResponse("main_page.html",{"request": request, "header_template": header_template, "content_template": content_template,
-                                                            "conversations": all_conversations, # ← передаем все чаты
-                                                            "messages":messages # ← List сообщений с полями role и content активного чата
-                                                            })
+                                                                "conversations": all_conversations, # ← передаем все чаты
+                                                                "messages":messages, # ← List сообщений с полями role и content активного чата
+                                                                "active_conversation_id": active_conversation.id
+                                                                })
 
     else:
         header_template = "partials/header_guest.html"
