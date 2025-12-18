@@ -4,7 +4,7 @@ from typing import Optional, List
 from models import User, Conversation, Message
 from schemas import UserCreateSchema, UserSchema, UserLoginSchema
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, update
+from sqlalchemy import select, update, func
 
 
 class UserCRUD:
@@ -61,14 +61,14 @@ class ChatCRUD:
 
     @staticmethod  #Сохраняем сообщение в бд
     async def add_message(db: AsyncSession,conversation_id: int, role:str, content: str) -> Message:
-        print(conversation_id, role, content)
+
         message = Message(conversation_id = conversation_id, role = role, content = content)
         db.add(message)
 
-        print("Диалог Добавлен")
+        await ChatCRUD.update_conversation_time(db, conversation_id)
+
         await db.commit()
         await db.refresh(message)
-
         return message
 
     @staticmethod
@@ -95,6 +95,20 @@ class ChatCRUD:
     async def get_conversation_data(db: AsyncSession, conversation_id:int) -> Optional[Conversation]:
         result = await db.execute(select(Conversation).where(Conversation.user_id == conversation_id))
         return result.scalar_one_or_none()
+
+    @staticmethod
+    async def update_conversation_time(db: AsyncSession, conversation_id:int) -> Optional[Conversation]:
+        result = await db.execute(update(Conversation).where(Conversation.id == conversation_id).values(updated_at=func.now()).returning(Conversation))  # БД сама подставит текущее время
+        conversation = result.scalar_one_or_none()
+
+        if conversation:
+            await db.commit()
+            await db.refresh(conversation)
+            return conversation
+
+        return None
+
+
 
     @staticmethod
     async def is_conversation_owner(db: AsyncSession, conversation_id:int, user_id:int) -> bool:
