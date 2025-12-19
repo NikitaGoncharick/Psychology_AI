@@ -180,8 +180,8 @@ async def free_conversation(request: Request, text: str):
                     <script>
                         var modal = new bootstrap.Modal(document.getElementById('guestLimitModal'));
                         modal.show();
-                    </script>
-                """)
+                    </script> """)
+
     else:
         new_count = message_count + 1
 
