@@ -174,7 +174,7 @@ async def show_pricing_page(request: Request, auth_payload: Optional[Dict] = Dep
 
 @app.post("/send")
 async def send (request: Request, db: AsyncSession = Depends(get_db), text: str = Form(...), chat_id: int = Form(...), auth_payload: Optional[Dict] = Depends(auth_check)):
-    #reply = "Ваш ответ будет здесь" # ← потом Grok / RAG
+    #reply = "Ваш ответ будет здесь" # ← потом Grok / rag
     # Проверка авторизации
     if not auth_payload:
         return templates.TemplateResponse("login_page.html", {"request": request})
