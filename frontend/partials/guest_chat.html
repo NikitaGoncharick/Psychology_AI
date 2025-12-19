@@ -49,6 +49,81 @@
           </small>
         </div>
       </div>
+
+        <!-- Красивая модалка: конец бесплатных сообщений -->
+        <div class="modal fade" id="guestLimitModal" tabindex="-1" aria-labelledby="guestLimitModalLabel" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content overflow-hidden border-0 shadow-xl" style="border-radius: 24px; max-width: 500px;">
+
+              <!-- Градиентный хедер с волной -->
+              <div class="position-relative text-white text-center py-5" style="
+                background: linear-gradient(135deg, #4a9086 0%, #6ab5a8 100%);
+                border-radius: 24px 24px 0 0;
+                overflow: hidden;
+              ">
+                <!-- Декоративная волна снизу -->
+                <svg viewBox="0 0 500 150" preserveAspectRatio="none" class="position-absolute bottom-0 start-0 w-100" style="height: 60px;">
+                  <path d="M0,100 C150,150 350,50 500,100 L500,150 L0,150 Z" fill="white" opacity="0.15"></path>
+                </svg>
+
+                <!-- Большая иконка с сердцем -->
+                <div class="mx-auto mb-3 d-inline-flex align-items-center justify-content-center rounded-circle bg-white bg-opacity-20"
+                     style="width: 90px; height: 90px; backdrop-filter: blur(10px);">
+                  <i class="fs-1">💙</i>
+                </div>
+
+                <h4 class="modal-title fw-bold mb-2 px-4" id="guestLimitModalLabel">
+                  Вы были услышаны
+                </h4>
+                <p class="mb-0 px-4 opacity-90" style="font-size: 1.05rem;">
+                  Спасибо, что поделились своими мыслями
+                </p>
+              </div>
+
+              <!-- Тело модалки -->
+              <div class="modal-body text-center py-5 px-4 bg-white">
+                <p class="text-muted mb-4 lead" style="font-size: 1.1rem;">
+                  Вы использовали все 3 бесплатных сообщения в гостевом режиме.
+                </p>
+
+                <p class="mb-5 text-dark" style="line-height: 1.6;">
+                  Чтобы продолжить наше спокойное и доверительное общение без ограничений —
+                  <strong>присоединяйтесь к сообществу</strong>.
+                </p>
+
+                <!-- Кнопки с иконками и мягкой анимацией -->
+                <div class="d-grid gap-3 mx-3">
+                  <a href="/register" class="btn btn-lg fw-semibold position-relative overflow-hidden d-flex align-items-center justify-content-center gap-3"
+                     style="
+                       background: linear-gradient(135deg, #4a9086, #5ab8a9);
+                       color: white;
+                       border: none;
+                       border-radius: 16px;
+                       padding: 16px;
+                       transition: all 0.3s ease;
+                       box-shadow: 0 8px 25px rgba(74, 144, 134, 0.3);
+                     "
+                     onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 12px 30px rgba(74,144,134,0.4)'"
+                     onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 8px 25px rgba(74,144,134,0.3)'">
+                    <i class="fs-4">✨</i>
+                    <span>Создать аккаунт</span>
+                  </a>
+
+                  <a href="/login" class="btn btn-lg btn-outline-secondary fw-medium"
+                     style="border-radius: 16px; padding: 14px; border-width: 2px;">
+                    У меня уже есть аккаунт
+                  </a>
+                </div>
+
+                <div class="mt-5">
+                  <small class="text-muted d-block mb-1">
+                    Это займёт <strong>меньше минуты</strong>
+                  </small>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
     </div>
     <!-- конец чата -->
 

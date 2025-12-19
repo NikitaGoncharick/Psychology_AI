@@ -176,12 +176,12 @@ async def free_conversation(request: Request, text: str):
     # Читаем cookie с счётчиком (по умолчанию 0)
     message_count = int(request.cookies.get("guest_messages", "0"))
     if message_count >= 3:
-        reply = (
-
-            "Вы использовали все беслатные сообщения 🙏</p>"
-            "<p>Чтобы продолжить общение без ограничений зарегистрируйтесь или войдите в учетную запись</p>"
-
-        )
+        return HTMLResponse("""
+                    <script>
+                        var modal = new bootstrap.Modal(document.getElementById('guestLimitModal'));
+                        modal.show();
+                    </script>
+                """)
     else:
         new_count = message_count + 1
 
@@ -189,12 +189,6 @@ async def free_conversation(request: Request, text: str):
         response = templates.TemplateResponse("message.html", {"request": request, "user_text": text, "ai_reply": reply})
         response.set_cookie(key = "guest_messages", value = str(new_count), max_age = 60, httponly=True, samesite="lax")
         return response
-
-    # Если лимит исчерпан — возвращаем просто сообщение (без cookie)
-    return templates.TemplateResponse(
-        "message.html",
-        {"request": request, "user_text": "", "ai_reply": reply}
-    )
 
 @app.post("/guest/send")
 async def guest_send(request: Request, text: str = Form(...)):
