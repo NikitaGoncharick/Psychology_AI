@@ -10,6 +10,12 @@ class User(Base):
     email:Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
     password:Mapped[str] = mapped_column(String(255), nullable=False)
     user_cash:Mapped[float] = mapped_column(Float, default=0.0)
+    # Подписка
+    user_subscription:Mapped[bool] = mapped_column(Boolean, default=False)
+    subscription_start:Mapped[datetime] = mapped_column(DateTime, nullable=True, default=None)
+    subscription_end:Mapped[datetime] = mapped_column(DateTime, nullable=True, default=None)
+    # Токены
+    user_free_tokens:Mapped[float] = mapped_column(Integer, default=3)
     # Связь с чатами
     conversations: Mapped[list["Conversation"]] = relationship("Conversation", back_populates="user", cascade="all, delete-orphan")
 

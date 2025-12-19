@@ -70,6 +70,8 @@ async def create_token(user_email: str, redirect_url: str = '/'):
     response.set_cookie("access_token", value=access_token, httponly=True, samesite='lax', secure=True, max_age=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60)
     return response
 
+
+
 @app.post("/conversations/new")
 async def create_new_conversation(request: Request,auth_payload: Optional[Dict] = Depends(auth_check), db: AsyncSession = Depends(get_db)):
     if auth_payload is None:
@@ -159,8 +161,6 @@ async def root(request: Request, active_chat_id: Optional[int] = None, auth_payl
         content_template = "partials/guest_chat.html"
         return templates.TemplateResponse("main_page.html", {"request": request,"header_template": header_template,"content_template": content_template})
 
-
-
 @app.get("/pricing")
 async def show_pricing_page(request: Request, auth_payload: Optional[Dict] = Depends(auth_check)):
     if auth_payload:
@@ -172,6 +172,33 @@ async def show_pricing_page(request: Request, auth_payload: Optional[Dict] = Dep
 
     return templates.TemplateResponse("main_page.html", {"request": request, "header_template": header_template, "content_template": content_template})
 
+async def free_conversation(request: Request, text: str):
+    # Читаем cookie с счётчиком (по умолчанию 0)
+    message_count = int(request.cookies.get("guest_messages", "0"))
+    if message_count >= 3:
+        reply = (
+
+            "Вы использовали все беслатные сообщения 🙏</p>"
+            "<p>Чтобы продолжить общение без ограничений зарегистрируйтесь или войдите в учетную запись</p>"
+
+        )
+    else:
+        new_count = message_count + 1
+
+        reply = await groq_ai_answer(text)
+        response = templates.TemplateResponse("message.html", {"request": request, "user_text": text, "ai_reply": reply})
+        response.set_cookie(key = "guest_messages", value = str(new_count), max_age = 60, httponly=True, samesite="lax")
+        return response
+
+    # Если лимит исчерпан — возвращаем просто сообщение (без cookie)
+    return templates.TemplateResponse(
+        "message.html",
+        {"request": request, "user_text": "", "ai_reply": reply}
+    )
+
+@app.post("/guest/send")
+async def guest_send(request: Request, text: str = Form(...)):
+    return await free_conversation(request, text) #прерываем выполнение через return
 @app.post("/send")
 async def send (request: Request, db: AsyncSession = Depends(get_db), text: str = Form(...), chat_id: int = Form(...), auth_payload: Optional[Dict] = Depends(auth_check)):
 
@@ -219,6 +246,8 @@ async def send (request: Request, db: AsyncSession = Depends(get_db), text: str 
     await ChatCRUD.add_message(db = db, conversation_id = conversation_id_to_use, role = "assistant", content= reply)
 
     return templates.TemplateResponse("message.html",{"request": request, "user_text": text, "ai_reply": reply})
+
+
 
 
 @app.get("/login")
