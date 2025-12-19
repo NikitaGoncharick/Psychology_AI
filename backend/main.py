@@ -1,20 +1,20 @@
 # main.py
-import asyncio
 from contextlib import asynccontextmanager
-from typing import Optional
 
 import jinja2
 import uvicorn
 from fastapi import FastAPI, Request, Form, Depends, HTTPException
 from fastapi.responses import HTMLResponse
 from pydantic import ValidationError
-from pyexpat.errors import messages
-from sqlalchemy.dialects.mysql.mariadb import loader
+
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.responses import JSONResponse, RedirectResponse
 from starlette.templating import Jinja2Templates
 from typing import Optional, Dict
 
+from watchfiles import awatch
+
+from question_control import is_psychology_related
 from config import settings
 from groq_api import groq_ai_answer
 from database import engine, get_db
@@ -174,7 +174,7 @@ async def show_pricing_page(request: Request, auth_payload: Optional[Dict] = Dep
 
 @app.post("/send")
 async def send (request: Request, db: AsyncSession = Depends(get_db), text: str = Form(...), chat_id: int = Form(...), auth_payload: Optional[Dict] = Depends(auth_check)):
-    #reply = "Ваш ответ будет здесь" # ← потом Grok / rag
+
     # Проверка авторизации
     if not auth_payload:
         return templates.TemplateResponse("login_page.html", {"request": request})
@@ -209,7 +209,12 @@ async def send (request: Request, db: AsyncSession = Depends(get_db), text: str 
     # Сохраняем сообщение пользователя
     await ChatCRUD.add_message(db = db, conversation_id = conversation_id_to_use, role = "user", content= text)
 
-    reply = await groq_ai_answer(text)
+    # === ФИЛЬТР ===
+    if not await is_psychology_related(text):
+        reply = "SORRY"
+    else:
+        reply = await groq_ai_answer(text)
+
     # Сохраняем сообщение AI
     await ChatCRUD.add_message(db = db, conversation_id = conversation_id_to_use, role = "assistant", content= reply)
 
