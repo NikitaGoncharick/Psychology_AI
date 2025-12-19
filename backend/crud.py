@@ -61,10 +61,10 @@ class ChatCRUD:
 
     @staticmethod  #Сохраняем сообщение в бд
     async def add_message(db: AsyncSession,conversation_id: int, role:str, content: str) -> Message:
-
         message = Message(conversation_id = conversation_id, role = role, content = content)
         db.add(message)
 
+        # Обновляем время диалога
         await ChatCRUD.update_conversation_time(db, conversation_id)
 
         await db.commit()
