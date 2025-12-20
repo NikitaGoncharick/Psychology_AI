@@ -49,17 +49,27 @@
     margin-bottom: 0;
   }
 
-  /* Карусель ценностей — горизонтальный скролл */
-  .values-carousel {
-    display: flex;
-    overflow-x: auto;
-    gap: 24px;
-    padding: 20px 0;
-    scroll-snap-type: x mandatory;
-    scrollbar-width: none;
+  .values-carousel-container {
+  width: 100%;
+  padding: 0 20px; /* Отступы по бокам на мобильных */
+  box-sizing: border-box;
+  overflow: hidden; /* Чтобы не было горизонтального скролла на body */
+ }
 
+    /*карусель — flex с центрированием */
+    .values-carousel {
+      display: flex;
+      overflow-x: auto;
+      gap: 32px;
+      padding: 32px 0;
+      scroll-snap-type: x mandatory;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
 
-  }
+      /* Ключ: центрируем содержимое */
+      justify-content: center; /* Главное изменение! */
+      flex-wrap: nowrap;
+    }
 
   .values-carousel::-webkit-scrollbar {
     display: none;
@@ -183,36 +193,43 @@
 </section>
 
 <!-- Core Values — карусель -->
+<!-- Core Values — карусель с полной шириной -->
 <section class="py-5 bg-white">
   <div class="container">
     <div class="text-center mb-5">
       <h2 class="fw-bold fs-2">Our Core Strengths</h2>
     </div>
+  </div>
+
+  <!-- Карусель вынесена из container для полной ширины -->
+  <div class="values-carousel-container">
     <div class="values-carousel">
       <div class="value-card">
         <div class="value-icon">🧠</div>
         <h4>Advanced AI Psychology</h4>
         <p>Powered by state-of-the-art language models trained on psychological principles for deep, meaningful conversations.</p>
       </div>
+
       <div class="value-card">
         <div class="value-icon">🔒</div>
         <h4>Absolute Privacy</h4>
         <p>End-to-end encryption. Your conversations are 100% private and never used for training or shared.</p>
       </div>
+
       <div class="value-card">
         <div class="value-icon">💙</div>
         <h4>Human-Centered Design</h4>
         <p>Developed with licensed psychologists to ensure safe, supportive, and ethically sound interactions.</p>
       </div>
+
       <div class="value-card">
         <div class="value-icon">⚡</div>
         <h4>Instant Availability</h4>
         <p>Always here for you — 24/7, without appointments or waiting. Support whenever you need it most.</p>
       </div>
-      <!-- Можно добавить ещё карточек -->
     </div>
   </div>
-</section>
+</section>.values-carousel
 
 <!-- Statistics Block -->
 <section class="stats-section">
