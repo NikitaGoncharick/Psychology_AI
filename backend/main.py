@@ -131,6 +131,17 @@ async def rename_conversation(conversation_id: int = Form(...), new_name: str = 
 
     return RedirectResponse(url="/", status_code=303)
 
+
+@app.get("/home")
+async def show_home(request: Request, auth_payload: Optional[Dict] = Depends(auth_check)):
+    if auth_payload:
+        header_template = "partials/header_user.html"
+        content_template = "partials/promo.html"
+    else:
+        header_template = "partials/header_guest.html"
+        content_template = "partials/promo.html"
+
+    return templates.TemplateResponse("home_page.html", {"request": request, "header_template": header_template, "content_template": content_template})
 @app.get("/")
 async def root(request: Request, active_chat_id: Optional[int] = None, auth_payload: Optional[Dict] = Depends(auth_check), db: AsyncSession = Depends(get_db)):
     if auth_payload:
