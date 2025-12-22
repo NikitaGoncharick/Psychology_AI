@@ -21,7 +21,7 @@ from database import engine, get_db
 from models import Base  # Base уже с зарегистрированными моделями
 from crud import UserCRUD, UserCreateSchema, UserLoginSchema, ChatCRUD
 from auth import create_access_token, decode_token
-from billing import create_or_retrieve_subscription
+from billing import create_session_checkout, price_IDS
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -142,15 +142,20 @@ async def show_pricing_page(request: Request, auth_payload: Optional[Dict] = Dep
     return templates.TemplateResponse("main_page.html", {"request": request, "header_template": header_template, "content_template": content_template})
 
 
-@app.post("/pricing/session")
-async def get_test_data(auth_payload: Optional[Dict] = Depends(auth_check), db: AsyncSession = Depends(get_db)):
-    if auth_payload:
-        email = auth_payload["sub"]
-        user = await UserCRUD.get_user_by_email(db, email)
-        await create_or_retrieve_subscription(db, user)
+@app.post("/create-checkout-session")
+async def create_checkout(db: AsyncSession = Depends(get_db), auth_payload: Optional[Dict] = Depends(auth_check), plan_type: str = Form("plan_type"), ):
+    if not auth_payload:
         return None
 
-    return None
+    user = await UserCRUD.get_user_by_email(db, auth_payload["sub"])
+    price_id = price_IDS.get(plan_type)
+    if not price_id:
+        raise HTTPException(404, "Invalid plan")
+
+    checkout_url = await create_session_checkout(db, user, price_id)
+    return RedirectResponse(checkout_url, status_code=303)
+
+
 
 @app.post("/guest/send")
 async def guest_send(request: Request, text: str = Form(...)):
