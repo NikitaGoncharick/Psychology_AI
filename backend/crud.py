@@ -60,7 +60,8 @@ class UserCRUD:
     @staticmethod
     async def update_subscription(db: AsyncSession, user: User, subscription_id: Optional[str], status: str, period_end: Optional[datetime]) -> Optional[User]:
         #Обновляем статус подписки после webhook от Stripe
-        user.stripe_subscription_id = subscription_id
+        if subscription_id is not None:
+            user.stripe_subscription_id = subscription_id
         user.subscription_status = status
         user.subscription_current_period_end = period_end
         await db.commit()
@@ -71,6 +72,19 @@ class UserCRUD:
     async def is_subscription_active(db: AsyncSession, user: User) -> bool:
         if user.subscription_status != "active":
             return False
+
+        # Проверяем, не истёк ли период
+        if user.subscription_current_period_end is None:
+            return False
+
+        if datetime.datetime.utcnow() > user.subscription_current_period_end:
+            # Подписка истекла — обновляем статус для будущего
+            user.subscription_status = "inactive"
+            user.subscription_current_period_end = None
+            await db.commit()
+            await db.refresh(user)
+            return False
+
         return True
     # ================
 
