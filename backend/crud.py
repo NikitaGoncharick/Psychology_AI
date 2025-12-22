@@ -33,7 +33,6 @@ class UserCRUD:
         user = result.scalar_one_or_none()
         if user and user.password == user_data.password:
             return user
-
         return None
 
     @staticmethod
@@ -43,6 +42,37 @@ class UserCRUD:
         result = await db.execute(query)
         return result.scalar_one_or_none()
 
+    #================
+    @staticmethod
+    async def get_by_stripe_customer_id(db: AsyncSession, customer_id: str) -> Optional[User]:
+        #Находим пользователя по ID из Stripe (нужно для webhook)
+        result = await db.execute(select(User).where(User.stripe_customer_id == customer_id))
+        return result.scalar_one_or_none()
+
+    @staticmethod
+    async def update_stripe_customer_id(db: AsyncSession, user:User, customer_id: str) -> Optional[User]:
+        #Сохраняем customer_id после первого создания в Stripe
+        user.stripe_customer_id = customer_id
+        await db.commit()
+        await db.refresh(user)
+        return user
+
+    @staticmethod
+    async def update_subscription(db: AsyncSession, user: User, subscription_id: Optional[str], status: str, period_end: Optional[datetime]) -> Optional[User]:
+        #Обновляем статус подписки после webhook от Stripe
+        user.stripe_subscription_id = subscription_id
+        user.subscription_status = status
+        user.subscription_current_period_end = period_end
+        await db.commit()
+        await db.refresh(user)
+        return user
+
+    @staticmethod
+    async def is_subscription_active(db: AsyncSession, user: User) -> bool:
+        if user.subscription_status != "active":
+            return False
+        return True
+    # ================
 
 class ChatCRUD:
     @staticmethod # Находим последний чат пользователя или создаем новый при первом запуске

@@ -110,7 +110,11 @@
         <div class="pricing-card">
           <h4 class="mb-4">Weekly</h4>
           <div class="price">$3.99 <small>/week</small></div>
-          <button class="btn btn-choose">Choose Weekly</button>
+
+          <form action="/pricing/session" method="POST" class="d-inline">
+              <input type="hidden" name="plan_type" value="weekly">
+              <button type="submit" class="btn btn-choose">Choose Weekly</button>
+          </form>
         </div>
       </div>
 

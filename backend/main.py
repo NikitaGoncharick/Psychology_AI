@@ -21,6 +21,7 @@ from database import engine, get_db
 from models import Base  # Base уже с зарегистрированными моделями
 from crud import UserCRUD, UserCreateSchema, UserLoginSchema, ChatCRUD
 from auth import create_access_token, decode_token
+from billing import create_or_retrieve_subscription
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -140,6 +141,16 @@ async def show_pricing_page(request: Request, auth_payload: Optional[Dict] = Dep
 
     return templates.TemplateResponse("main_page.html", {"request": request, "header_template": header_template, "content_template": content_template})
 
+
+@app.post("/pricing/session")
+async def get_test_data(auth_payload: Optional[Dict] = Depends(auth_check), db: AsyncSession = Depends(get_db)):
+    if auth_payload:
+        email = auth_payload["sub"]
+        user = await UserCRUD.get_user_by_email(db, email)
+        await create_or_retrieve_subscription(db, user)
+        return None
+
+    return None
 
 @app.post("/guest/send")
 async def guest_send(request: Request, text: str = Form(...)):

@@ -1,4 +1,6 @@
 from datetime import datetime
+from typing import Optional
+
 from sqlalchemy import Column, Integer, String, DateTime, Boolean, ForeignKey, Float, Text, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from database import Base
@@ -10,10 +12,11 @@ class User(Base):
     email:Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
     password:Mapped[str] = mapped_column(String(255), nullable=False)
     user_cash:Mapped[float] = mapped_column(Float, default=0.0)
-    # Подписка
-    user_subscription:Mapped[bool] = mapped_column(Boolean, default=False)
-    subscription_start:Mapped[datetime] = mapped_column(DateTime, nullable=True, default=None)
-    subscription_end:Mapped[datetime] = mapped_column(DateTime, nullable=True, default=None)
+    # Подписка на Stripe
+    stripe_customer_id: Mapped[Optional[str]] = mapped_column(String(255), nullable=True, unique=True) # уникальный ID пользователя в Stripe
+    stripe_subscription_id: Mapped[Optional[str]] = mapped_column(String(255), nullable=True, unique=True) # ID активной подписки
+    subscription_status: Mapped[str] = mapped_column(String(50),default="inactive")  # active, trialing, past_due, canceled и т.д.
+    subscription_current_period_end: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
     # Токены
     user_free_tokens:Mapped[float] = mapped_column(Integer, default=3)
     # Связь с чатами

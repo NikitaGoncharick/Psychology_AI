@@ -7,6 +7,7 @@ class Settings(BaseSettings):
     ALGORITHM: str
     SECRET_KEY: str
     ACCESS_TOKEN_EXPIRE_MINUTES: int
+    STRIPE_SECRET_KEY: str
 
     model_config = {
         "env_file": ".env",
