@@ -47,6 +47,7 @@ async def handle_webhook_event(event: dict, db: AsyncSession):
         customer_id = data["customer"]
         user = await UserCRUD.get_by_stripe_customer_id(db, customer_id)
         if user:
+            print("Платёж Успешно Прошёл")
             await UserCRUD.update_subscription(db, user,
                                                subscription_id=data["subscription"],
                                                status="active",
@@ -57,6 +58,7 @@ async def handle_webhook_event(event: dict, db: AsyncSession):
             customer_id = data["customer"]
             user = await UserCRUD.get_by_stripe_customer_id(db, customer_id)
             if user:
+                print("Платёж не прошёл")
                 await UserCRUD.update_subscription(db, user, data["subscription"], "past_due", None)
 
         # Подписка отменена
@@ -64,4 +66,5 @@ async def handle_webhook_event(event: dict, db: AsyncSession):
             customer_id = data["customer"]
             user = await UserCRUD.get_by_stripe_customer_id(db, customer_id)
             if user:
+                print("Подписка отменена")
                 await UserCRUD.update_subscription(db, user,None, "canceled", None)

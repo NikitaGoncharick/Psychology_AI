@@ -2,6 +2,7 @@
 from contextlib import asynccontextmanager
 
 import jinja2
+import stripe
 import uvicorn
 from fastapi import FastAPI, Request, Form, Depends, HTTPException
 from fastapi.responses import HTMLResponse
@@ -21,7 +22,7 @@ from database import engine, get_db
 from models import Base  # Base уже с зарегистрированными моделями
 from crud import UserCRUD, UserCreateSchema, UserLoginSchema, ChatCRUD
 from auth import create_access_token, decode_token
-from billing import create_session_checkout, price_IDS
+from billing import create_session_checkout, price_IDS, handle_webhook_event
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -143,7 +144,7 @@ async def show_pricing_page(request: Request, auth_payload: Optional[Dict] = Dep
 
 
 @app.post("/create-checkout-session")
-async def create_checkout(db: AsyncSession = Depends(get_db), auth_payload: Optional[Dict] = Depends(auth_check), plan_type: str = Form("plan_type"), ):
+async def create_checkout(request: Request,db: AsyncSession = Depends(get_db), auth_payload: Optional[Dict] = Depends(auth_check), plan_type: str = Form("plan_type"), ):
     if not auth_payload:
         return None
 
@@ -155,7 +156,18 @@ async def create_checkout(db: AsyncSession = Depends(get_db), auth_payload: Opti
     checkout_url = await create_session_checkout(db, user, price_id)
     return RedirectResponse(checkout_url, status_code=303)
 
+# Webhook от Stripe | единственный надёжный способ синхронизировать состояние подписки в Stripe с БД.
+@app.post("/webhook/stripe")
+async def stripe_webhook(request: Request, db: AsyncSession = Depends(get_db)):
+    payload = await request.body()
+    sig_header = request.headers.get("stripe-signature")
+    try:
+        event = stripe.Webhook.construct_event(payload, sig_header, settings.STRIPE_WEBHOOK_SECRET)
+    except:
+        raise HTTPException(400)
 
+    await handle_webhook_event(event, db)
+    return {"status": "ok"}
 
 @app.post("/guest/send")
 async def guest_send(request: Request, text: str = Form(...)):

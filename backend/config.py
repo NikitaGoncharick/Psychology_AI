@@ -8,6 +8,7 @@ class Settings(BaseSettings):
     SECRET_KEY: str
     ACCESS_TOKEN_EXPIRE_MINUTES: int
     STRIPE_SECRET_KEY: str
+    STRIPE_WEBHOOK_SECRET: str
 
     model_config = {
         "env_file": ".env",
