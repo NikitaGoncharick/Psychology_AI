@@ -142,33 +142,6 @@ async def show_pricing_page(request: Request, auth_payload: Optional[Dict] = Dep
 
     return templates.TemplateResponse("main_page.html", {"request": request, "header_template": header_template, "content_template": content_template})
 
-
-@app.post("/create-checkout-session")
-async def create_checkout(request: Request,db: AsyncSession = Depends(get_db), auth_payload: Optional[Dict] = Depends(auth_check), plan_type: str = Form("plan_type"), ):
-    if not auth_payload:
-        return None
-
-    user = await UserCRUD.get_user_by_email(db, auth_payload["sub"])
-    price_id = price_IDS.get(plan_type)
-    if not price_id:
-        raise HTTPException(404, "Invalid plan")
-
-    checkout_url = await create_session_checkout(db, user, price_id)
-    return RedirectResponse(checkout_url, status_code=303)
-
-# Webhook от Stripe | единственный надёжный способ синхронизировать состояние подписки в Stripe с БД.
-@app.post("/webhook/stripe")
-async def stripe_webhook(request: Request, db: AsyncSession = Depends(get_db)):
-    payload = await request.body()
-    sig_header = request.headers.get("stripe-signature")
-    try:
-        event = stripe.Webhook.construct_event(payload, sig_header, settings.STRIPE_WEBHOOK_SECRET)
-    except:
-        raise HTTPException(400)
-
-    await handle_webhook_event(event, db)
-    return {"status": "ok"}
-
 @app.post("/guest/send")
 async def guest_send(request: Request, text: str = Form(...)):
     return await free_conversation(request, text) #прерываем выполнение через return
@@ -269,6 +242,10 @@ async def show_contacts(request: Request, auth_payload: Optional[Dict] = Depends
 
     return templates.TemplateResponse("contacts_page.html", {"request": request, "header_template": header_template, "content_template": content_template})
 
+@app.get("/payments/result")
+async def show_payment_info(request: Request):
+    return templates.TemplateResponse("failed_payment.html", {"request": request})
+
 # =====================
 @app.post("/conversations/new")
 async def create_new_conversation(request: Request,auth_payload: Optional[Dict] = Depends(auth_check), db: AsyncSession = Depends(get_db)):
@@ -329,6 +306,30 @@ async def rename_conversation(conversation_id: int = Form(...), new_name: str = 
 
     return RedirectResponse(url="/", status_code=303)
 
+@app.post("/create-checkout-session")
+async def create_checkout(request: Request,db: AsyncSession = Depends(get_db), auth_payload: Optional[Dict] = Depends(auth_check), plan_type: str = Form("plan_type"), ):
+    if not auth_payload:
+        return None
+
+    user = await UserCRUD.get_user_by_email(db, auth_payload["sub"])
+    price_id = price_IDS.get(plan_type)
+    if not price_id:
+        raise HTTPException(404, "Invalid plan")
+
+    checkout_url = await create_session_checkout(db, user, price_id)
+    return RedirectResponse(checkout_url, status_code=303)
+
+@app.post("/webhook/stripe") # Webhook для Stripe | единственный надёжный способ синхронизировать состояние подписки в Stripe с БД.
+async def stripe_webhook(request: Request, db: AsyncSession = Depends(get_db)):
+    payload = await request.body()
+    sig_header = request.headers.get("stripe-signature")
+    try:
+        event = stripe.Webhook.construct_event(payload, sig_header, settings.STRIPE_WEBHOOK_SECRET)
+    except:
+        raise HTTPException(400)
+
+    await handle_webhook_event(event, db)
+    return {"status": "ok"}
 
 
 if __name__ == "__main__":
