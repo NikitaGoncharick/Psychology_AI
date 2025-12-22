@@ -242,7 +242,11 @@ async def show_contacts(request: Request, auth_payload: Optional[Dict] = Depends
 
     return templates.TemplateResponse("contacts_page.html", {"request": request, "header_template": header_template, "content_template": content_template})
 
-@app.get("/payments/result")
+@app.get("/payments/success")
+async def show_payment_info(request: Request):
+    return templates.TemplateResponse("success_payment.html", {"request": request})
+
+@app.get("/payments/failed")
 async def show_payment_info(request: Request):
     return templates.TemplateResponse("failed_payment.html", {"request": request})
 
