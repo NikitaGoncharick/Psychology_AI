@@ -23,6 +23,8 @@ from models import Base  # Base уже с зарегистрированными
 from crud import UserCRUD, UserCreateSchema, UserLoginSchema, ChatCRUD
 from auth import create_access_token, decode_token
 from billing import create_session_checkout, price_IDS, handle_webhook_event
+import message_handler
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -71,25 +73,6 @@ async def create_token(user_email: str, redirect_url: str = '/'):
     response = RedirectResponse(url=redirect_url, status_code=303)
     response.set_cookie("access_token", value=access_token, httponly=True, samesite='lax', secure=True, max_age=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60)
     return response
-
-async def free_conversation(request: Request, text: str):
-    # Читаем cookie с счётчиком (по умолчанию 0)
-    message_count = int(request.cookies.get("guest_messages", "0"))
-    if message_count >= 3:
-        return HTMLResponse("""
-                    <script>
-                        var modal = new bootstrap.Modal(document.getElementById('guestLimitModal'));
-                        modal.show();
-                    </script> """)
-
-    else:
-        new_count = message_count + 1
-
-        reply = await groq_ai_answer(text)
-        response = templates.TemplateResponse("message.html", {"request": request, "user_text": text, "ai_reply": reply})
-        response.set_cookie(key = "guest_messages", value = str(new_count), max_age = 60, httponly=True, samesite="lax")
-        return response
-
 
 @app.get("/home")
 async def show_home(request: Request, auth_payload: Optional[Dict] = Depends(auth_check)):
@@ -144,54 +127,10 @@ async def show_pricing_page(request: Request, auth_payload: Optional[Dict] = Dep
 
 @app.post("/guest/send")
 async def guest_send(request: Request, text: str = Form(...)):
-    return await free_conversation(request, text) #прерываем выполнение через return
+    return await message_handler.free_conversation(request, text) #прерываем выполнение через return
 @app.post("/send")
 async def send (request: Request, db: AsyncSession = Depends(get_db), text: str = Form(...), chat_id: int = Form(...), auth_payload: Optional[Dict] = Depends(auth_check)):
-
-    # Проверка авторизации
-    if not auth_payload:
-        return templates.TemplateResponse("login_page.html", {"request": request})
-
-    # Получаем email из токена
-    user_email = auth_payload.get("sub")
-    if not user_email:
-        return templates.TemplateResponse("login_page.html", {"request": request})
-
-    # Находим пользователя по email
-    user = await UserCRUD.get_user_by_email(db, user_email)
-    if not user:
-        return templates.TemplateResponse("login_page.html", {"request": request})
-
-    # Переменная для хранения ID чата
-    conversation_id_to_use = None
-    #--------------------------------------------------------------------------------
-
-    # Если передан chat_id, используем его, иначе последний чат
-    if chat_id:
-        is_owner = await ChatCRUD.is_conversation_owner(db, chat_id, user.id)
-        if is_owner:
-            conversation_id_to_use = chat_id
-        else:
-            conversation_id = await ChatCRUD.get_or_create_conversation(db, user.id)
-            conversation_id_to_use = conversation_id.id
-    else:
-        # Если chat_id не передан из htmx запроса, берем последний чат
-        conversation = await ChatCRUD.get_or_create_conversation(db, user.id)
-        conversation_id_to_use = conversation.id
-
-    # Сохраняем сообщение пользователя
-    await ChatCRUD.add_message(db = db, conversation_id = conversation_id_to_use, role = "user", content= text)
-
-    # === ФИЛЬТР ===
-    if not await is_psychology_related(text):
-        reply = "SORRY"
-    else:
-        reply = await groq_ai_answer(text)
-
-    # Сохраняем сообщение AI
-    await ChatCRUD.add_message(db = db, conversation_id = conversation_id_to_use, role = "assistant", content= reply)
-
-    return templates.TemplateResponse("message.html",{"request": request, "user_text": text, "ai_reply": reply})
+    return await message_handler.user_conversation(request, db, chat_id, text, auth_payload)
 
 @app.get("/login")
 async def show_login_page(request: Request):
