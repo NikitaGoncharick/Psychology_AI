@@ -2,6 +2,7 @@
 from contextlib import asynccontextmanager
 
 import jinja2
+import markdown
 import stripe
 import uvicorn
 from fastapi import FastAPI, Request, Form, Depends, HTTPException
@@ -55,6 +56,12 @@ templates = Jinja2Templates(
         jinja2.FileSystemLoader("../frontend"),
         jinja2.FileSystemLoader("../frontend/partials"),
     ])
+)
+
+# Регистрация фильтра Markdown для красивого рендеринга ответов ИИ
+templates.env.filters["markdown"] = lambda text: markdown.markdown(
+    text,
+    extensions=["nl2br", "fenced_code"]
 )
 
 async def auth_check(request: Request) -> Optional[Dict]: # auth_payload может быть либо словарем (dict), либо None

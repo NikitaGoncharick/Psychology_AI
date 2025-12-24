@@ -25,7 +25,7 @@
 <!-- Ответ ИИ (слева) -->
 <div class="d-flex justify-content-start mb-3">
     <div class="msg-ai p-3 word-break">
-        {{ ai_reply }}
+        {{ ai_reply | markdown | safe }}
     </div>
 </div>
 
