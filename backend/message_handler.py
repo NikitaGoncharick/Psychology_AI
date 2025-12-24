@@ -58,7 +58,7 @@ async def user_conversation(request, db, chat_id, text, auth_payload):
 
     # === ФИЛЬТР ===
     if not await is_psychology_related(text):
-        reply = "SORRY"
+        reply = "Sorry, I specialize only in topics related to psychology, emotions, relationships, and personal growth. 😊 Tell me what's bothering or worrying you — I'm here to support you."
     else:
         reply = await groq_ai_answer(text)
 
