@@ -53,4 +53,5 @@ async def is_psychology_related(query: str) -> bool:
         responce = await groq_ai_answer(classification_prompt.strip())
         return responce.strip().upper() == "YES"
     except:
+        print("Ошибка Запроса")
         return True

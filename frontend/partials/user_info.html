@@ -1,0 +1,223 @@
+<style>
+    :root {
+      --teal: #4a9086;
+      --teal-dark: #3a7a70;
+      --teal-light: #e8f4f3;
+      --bg: #f6f8fa;
+      --surface: #ffffff;
+      --border: #e0e4e8;
+      --text-primary: #0d1117;
+      --text-secondary: #57606a;
+      --text-muted: #6e7781;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text-primary);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      min-height: 100vh;
+    }
+
+    .container-profile {
+      max-width: 820px;
+      margin: 3rem auto;
+      padding: 0 1.5rem;
+    }
+
+    .profile-header {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      padding-bottom: 2rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .avatar-wrapper {
+      position: relative;
+    }
+
+    .avatar {
+      width: 88px;
+      height: 88px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--teal) 0%, var(--teal-dark) 100%);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.1rem;
+      font-weight: 600;
+      box-shadow: 0 4px 12px rgba(74, 144, 134, 0.25);
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+
+    .card-header {
+      background: #fafbfc;
+      padding: 1.25rem 1.75rem;
+      border-bottom: 1px solid var(--border);
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+
+    .list-group-item {
+      padding: 1.1rem 1.75rem;
+      border: none;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-primary);
+    }
+
+    .list-group-item:last-child {
+      border-bottom: none;
+    }
+
+    .status-badge {
+      font-size: 0.875rem;
+      padding: 0.35em 0.85em;
+      border-radius: 1em;
+      font-weight: 500;
+    }
+
+    .status-active {
+      background: var(--teal-light);
+      color: var(--teal-dark);
+    }
+
+    .btn-teal {
+      background: var(--teal);
+      border: none;
+      color: white;
+      padding: 0.65rem 1.4rem;
+      border-radius: 10px;
+      font-weight: 500;
+      transition: background 0.2s;
+    }
+
+    .btn-teal:hover {
+      background: var(--teal-dark);
+    }
+
+    .btn-outline-danger {
+      border-color: #d32f2f;
+      color: #d32f2f;
+    }
+
+    .text-teal { color: var(--teal); }
+    .text-muted { color: var(--text-muted); }
+    .small { font-size: 0.875rem; }
+  </style>
+
+<div class="container-profile">
+
+  <!-- Header + Avatar -->
+  <div class="profile-header">
+    <div class="avatar-wrapper">
+      <div class="avatar">U</div>
+    </div>
+    <div>
+      <h3 class="mb-1 fw-semibold">User Info</h3>
+      <div class="text-muted small">{{ profile_data.user_email }}</div>
+    </div>
+  </div>
+
+  <div class="mt-5">
+
+    <!-- Subscription -->
+    <div class="card">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span>Subscription</span>
+
+        {% if profile_data.subscription_status == "active" %}
+          <span class="status-badge status-active">Active</span>
+        {% else %}
+          <span class="status-badge" style="background:#f0f0f0; color:#666;">Inactive</span>
+        {% endif %}
+      </div>
+
+      <div class="list-group list-group-flush">
+        <!-- Информация показывается только при активной подписке -->
+        {% if profile_data.subscription_status == "active" %}
+
+          <div class="list-group-item d-flex justify-content-between">
+            <div>
+              <div class="fw-medium">Plan</div>
+              <div class="small text-muted">Premium · monthly</div>
+            </div>
+            <div class="text-end">
+              <div class="fw-medium">490 ₽ / month</div>
+              {% if profile_data.period_end %}
+                <div class="small text-muted">until {{ profile_data.period_end }}</div>
+              {% else %}
+                <div class="small text-muted">—</div>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="list-group-item">
+            <div class="fw-medium mb-2">What's included in the subscription:</div>
+            <ul class="small text-muted mb-0 ps-4" style="line-height: 1.7;">
+              <li>Unlimited number of messages</li>
+              <li>Priority response speed</li>
+              <li>Access to advanced analysis modes</li>
+              <li>Unlimited conversation history storage</li>
+            </ul>
+          </div>
+
+          <div class="list-group-item">
+            <button class="btn btn-outline-danger btn-sm">
+              Cancel Subscription
+            </button>
+            <small class="text-muted ms-3">
+              After cancellation, the subscription will remain active until the end of the paid period
+            </small>
+          </div>
+
+        {% else %}
+          <!-- Для всех остальных статусов (включая null, free, expired, etc.) -->
+          <div class="list-group-item">
+            <div class="fw-medium mb-2">No active subscription</div>
+            <p class="small text-muted mb-2">
+              You are currently using the free plan with limited features.
+            </p>
+            <button class="btn btn-teal btn-sm" onclick="window.location.href='/pricing'">
+              Upgrade to Premium
+            </button>
+          </div>
+        {% endif %}
+  </div>
+</div>
+
+    <!-- Account -->
+    <div class="card">
+      <div class="card-header">
+        Account
+      </div>
+      <div class="list-group list-group-flush">
+        <div class="list-group-item d-flex justify-content-between align-items-center">
+          <div>Registration date</div>
+          <div>October 12, 2025</div>
+        </div>
+        <div class="list-group-item d-flex justify-content-between align-items-center">
+          <div>Last login</div>
+          <div>December 26, 2025, 14:37</div>
+        </div>
+        <div class="list-group-item">
+          <button class="btn btn-outline-secondary btn-sm">Change Password</button>
+        </div>
+        <div class="list-group-item">
+          <button class="btn btn-outline-danger btn-sm">Delete Account</button>
+          <small class="text-muted ms-3">Irreversible action</small>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</div>

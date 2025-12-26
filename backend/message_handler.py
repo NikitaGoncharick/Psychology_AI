@@ -15,7 +15,13 @@ async def free_conversation(request: Request, text: str):
                     </script> """)
     else:
         new_count = message_count + 1
-        reply = await groq_ai_answer(text)
+
+        # === ФИЛЬТР ===
+        if not await is_psychology_related(text):
+            reply = "Sorry, I specialize only in topics related to psychology, emotions, relationships, and personal growth. 😊 Tell me what's bothering or worrying you — I'm here to support you."
+        else:
+            reply = await groq_ai_answer(text)
+
         response = templates.TemplateResponse("message.html", {"request": request, "user_text": text, "ai_reply": reply})
         response.set_cookie(key = "guest_messages", value = str(new_count), max_age = 60, httponly=True, samesite="lax")
         return response

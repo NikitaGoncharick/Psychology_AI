@@ -25,6 +25,7 @@ from crud import UserCRUD, UserCreateSchema, UserLoginSchema, ChatCRUD
 from auth import create_access_token, decode_token
 from billing import create_session_checkout, price_IDS, handle_webhook_event
 import message_handler
+import profile_handler
 
 
 @asynccontextmanager
@@ -188,6 +189,26 @@ async def show_contacts(request: Request, auth_payload: Optional[Dict] = Depends
 
     return templates.TemplateResponse("contacts_page.html", {"request": request, "header_template": header_template, "content_template": content_template})
 
+@app.get("/profile")
+async def show_profile_page(request: Request, auth_payload: Optional[Dict] = Depends(auth_check), db: AsyncSession = Depends(get_db)):
+    if not auth_payload:
+        return templates.TemplateResponse("login_page.html", {"request": request})
+
+    user_email = auth_payload["sub"]
+    user_data = await UserCRUD.get_user_by_email(db, user_email)
+    profile_data = await profile_handler.get_profile_data(request, db, user_data)
+
+    header_template = "partials/header_user.html"
+    content_template = "partials/user_info.html"
+
+    print(profile_data)
+
+    return templates.TemplateResponse("profile_page.html", {"request": request, "header_template": header_template, "content_template": content_template,
+                                                            "profile_data": profile_data})
+
+
+
+# =====================
 @app.get("/payments/success")
 async def show_payment_info(request: Request):
     return templates.TemplateResponse("success_payment.html", {"request": request})
