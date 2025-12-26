@@ -176,7 +176,8 @@ async def register_user(request: Request, db: AsyncSession = Depends(get_db), em
 
     #3. Создаём пользователя
     new_user = await UserCRUD.create_new_user(db, user_data)
-    return JSONResponse({"email": new_user.email, "id": new_user.id})
+
+    return await create_token(user_email=email)
 
 @app.get("/contacts")
 async def show_contacts(request: Request, auth_payload: Optional[Dict] = Depends(auth_check)):
@@ -214,12 +215,23 @@ async def delete_profile(request: Request, db: AsyncSession = Depends(get_db), a
     user_email = auth_payload["sub"]
     user_data = await UserCRUD.get_user_by_email(db, user_email)
 
+    # Удаляем пользователя из базы
     await UserCRUD.delete_account(db, user_data)
 
-    header_template = "partials/header_guest.html"
-    content_template = "partials/promo.html"
+    response = templates.TemplateResponse("home_page.html", {"request": request, "header_template": "partials/header_guest.html",
+                                                             "content_template": "partials/promo.html" })
+    response.delete_cookie(key="access_token", httponly=True, samesite="lax", secure=True)
+    return response
 
-    return templates.TemplateResponse("home_page.html", {"request": request, "header_template": header_template,"content_template": content_template})
+@app.post("/profile/log_out")
+async def logout(request: Request, db: AsyncSession = Depends(get_db), auth_payload: Optional[Dict] = Depends(auth_check)):
+    if not auth_payload:
+        return templates.TemplateResponse("login_page.html", {"request": request})
+
+    response = templates.TemplateResponse("home_page.html",{"request": request, "header_template": "partials/header_guest.html","content_template": "partials/promo.html"})
+    response.delete_cookie(key="access_token", httponly=True, samesite="lax", secure=True)
+    return response
+
 
 # =====================
 @app.get("/payments/success")

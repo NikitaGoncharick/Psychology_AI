@@ -88,6 +88,12 @@ class UserCRUD:
         return True
 
     @staticmethod
+    async def change_password(db : AsyncSession, user, new_password ):
+        user.password = new_password
+        await db.commit()
+        await db.refresh(user)
+
+    @staticmethod
     async def delete_account(db: AsyncSession, user: User):
         await db.delete(user)
         await db.commit()

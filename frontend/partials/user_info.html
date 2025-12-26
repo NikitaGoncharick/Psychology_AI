@@ -112,6 +112,93 @@
     .text-teal { color: var(--teal); }
     .text-muted { color: var(--text-muted); }
     .small { font-size: 0.875rem; }
+
+        .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 20000;
+        backdrop-filter: blur(4px);
+    }
+
+    .modal-content {
+        background: white;
+        border-radius: 16px;
+        padding: 32px;
+        width: 420px;
+        max-width: 90vw;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+        text-align: center;
+    }
+
+    .modal-content h3 {
+        margin: 0 0 16px;
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+
+    .modal-content p {
+        margin: 0 0 24px;
+        color: var(--text-muted);
+        font-size: 0.95rem;
+    }
+
+    .modal-rename-input {
+        width: 100%;
+        padding: 14px 16px;
+        margin: 12px 0;
+        border: 1px solid #d1d5db;
+        border-radius: 10px;
+        font-size: 1rem;
+        box-sizing: border-box;
+        transition: all 0.2s;
+    }
+
+    .modal-rename-input:focus {
+        border-color: var(--teal);
+        box-shadow: 0 0 0 3px rgba(74, 144, 134, 0.15);
+        outline: none;
+    }
+
+    .modal-actions {
+        display: flex;
+        justify-content: center;
+        gap: 16px;
+        margin-top: 24px;
+    }
+
+    .btn-cancel,
+    .btn-action {
+        padding: 12px 24px;
+        border-radius: 10px;
+        font-weight: 500;
+        cursor: pointer;
+        min-width: 120px;
+        border: none;
+        transition: all 0.2s;
+    }
+
+    .btn-cancel {
+        background: #f3f4f6;
+        color: #374151;
+    }
+
+    .btn-cancel:hover {
+        background: #e5e7eb;
+    }
+
+    .btn-action {
+        background: var(--teal);
+        color: white;
+    }
+
+    .btn-action:hover {
+        background: var(--teal-dark);
+    }
   </style>
 
 <div class="container-profile">
@@ -151,7 +238,7 @@
               <div class="small text-muted">Premium · monthly</div>
             </div>
             <div class="text-end">
-              <div class="fw-medium">490 ₽ / month</div>
+              <div class="fw-medium">{{ profile_data.subscription_price }}</div>
               {% if profile_data.period_end %}
                 <div class="small text-muted">until {{ profile_data.period_end }}</div>
               {% else %}
@@ -209,7 +296,9 @@
           <div>***</div>
         </div>
         <div class="list-group-item">
-          <button class="btn btn-outline-secondary btn-sm">Change Password</button>
+          <button type="button" class="btn btn-outline-secondary btn-sm" onclick="openPasswordModal()">
+                Change Password
+          </button>
         </div>
         <div class="list-group-item">
           <form action="/profile/delete" method="post"
@@ -224,5 +313,64 @@
     </div>
 
   </div>
-
 </div>
+
+    <!-- Модальное окно смены пароля -->
+    <div id="change-password-modal" class="modal-overlay" style="display: none;">
+    <div class="modal-content">
+        <h3>Change Password</h3>
+        <p>Enter your new password below</p>
+
+        <form id="change-password-form" action="/profile/change-password" method="POST">
+            <input
+                type="password"
+                name="new_password"
+                class="modal-rename-input"
+                placeholder="New password"
+                required
+                minlength="6"
+            >
+            <input
+                type="password"
+                name="new_password_confirm"
+                class="modal-rename-input"
+                placeholder="Confirm new password"
+                required
+                minlength="6"
+            >
+
+            <div class="modal-actions mt-4">
+                <button type="button" class="btn-cancel" onclick="closePasswordModal()">Cancel</button>
+                <button type="submit" class="btn-action">Change Password</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function openPasswordModal() {
+        document.getElementById('change-password-modal').style.display = 'flex';
+        // Фокус на первое поле
+        document.querySelector('#change-password-form input[name="new_password"]').focus();
+    }
+
+    function closePasswordModal() {
+        document.getElementById('change-password-modal').style.display = 'none';
+        // Можно очистить поля при закрытии
+        document.getElementById('change-password-form').reset();
+    }
+
+    // Закрытие по клику на фон
+    document.getElementById('change-password-modal')?.addEventListener('click', function(e) {
+        if (e.target === this) {
+            closePasswordModal();
+        }
+    });
+
+    // Закрытие по Esc
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closePasswordModal();
+        }
+    });
+</script>
