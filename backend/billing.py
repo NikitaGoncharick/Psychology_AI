@@ -17,6 +17,52 @@ price_IDS = {
 }
 
 
+async def get_user_subscription_price(user):
+    if not user.stripe_subscription_id:
+        return None
+
+    try:
+        subscription = stripe.Subscription.retrieve(user.stripe_subscription_id)
+
+        if subscription.status != "active":
+            return None
+
+        # Получаем список items через auto-pagination
+        items = subscription['items'].data  # Обращаемся как к словарю
+
+        if not items:
+            return None
+
+        # Первый элемент подписки
+        item = items[0]
+
+        # Получаем price_id из item
+        price_id = item.price.id
+
+        # Получаем объект Price
+        price = stripe.Price.retrieve(price_id)
+
+        amount = price.unit_amount / 100
+        currency = price.currency.upper()
+        interval = price.recurring.interval
+
+        # Форматируем
+        if currency == "RUB":
+            amount_str = f"{int(amount)} ₽"
+        else:
+            amount_str = f"{amount:.2f} {currency}"
+
+        print(f"{amount_str} / {interval}")
+        return f"{amount_str} / {interval}"
+
+    except stripe.error.StripeError as e:
+        print(f"Stripe error: {e}")
+        return None
+    except Exception as e:
+        print(f"Error getting subscription price: {e}")
+        return None
+
+
 # Создаём Stripe Customer, если это первая покупка
 async def create_or_retrieve_subscription(db: AsyncSession, user):
     if not user.stripe_customer_id:
