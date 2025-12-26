@@ -202,17 +202,22 @@
       <div class="list-group list-group-flush">
         <div class="list-group-item d-flex justify-content-between align-items-center">
           <div>Registration date</div>
-          <div>October 12, 2025</div>
+          <div>***</div>
         </div>
         <div class="list-group-item d-flex justify-content-between align-items-center">
           <div>Last login</div>
-          <div>December 26, 2025, 14:37</div>
+          <div>***</div>
         </div>
         <div class="list-group-item">
           <button class="btn btn-outline-secondary btn-sm">Change Password</button>
         </div>
         <div class="list-group-item">
-          <button class="btn btn-outline-danger btn-sm">Delete Account</button>
+          <form action="/profile/delete" method="post"
+              onsubmit="return confirm('Вы действительно хотите удалить аккаунт? Это действие нельзя отменить!');">
+            <button type="submit" class="btn btn-outline-danger btn-sm">
+                Delete Account
+            </button>
+          </form>
           <small class="text-muted ms-3">Irreversible action</small>
         </div>
       </div>

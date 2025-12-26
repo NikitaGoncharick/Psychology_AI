@@ -206,7 +206,20 @@ async def show_profile_page(request: Request, auth_payload: Optional[Dict] = Dep
     return templates.TemplateResponse("profile_page.html", {"request": request, "header_template": header_template, "content_template": content_template,
                                                             "profile_data": profile_data})
 
+@app.post("/profile/delete")
+async def delete_profile(request: Request, db: AsyncSession = Depends(get_db), auth_payload: Optional[Dict] = Depends(auth_check)):
+    if not auth_payload:
+        return templates.TemplateResponse("login_page.html", {"request": request})
 
+    user_email = auth_payload["sub"]
+    user_data = await UserCRUD.get_user_by_email(db, user_email)
+
+    await UserCRUD.delete_account(db, user_data)
+
+    header_template = "partials/header_guest.html"
+    content_template = "partials/promo.html"
+
+    return templates.TemplateResponse("home_page.html", {"request": request, "header_template": header_template,"content_template": content_template})
 
 # =====================
 @app.get("/payments/success")

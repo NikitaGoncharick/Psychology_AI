@@ -86,6 +86,11 @@ class UserCRUD:
             return False
 
         return True
+
+    @staticmethod
+    async def delete_account(db: AsyncSession, user: User):
+        await db.delete(user)
+        await db.commit()
     # ================
 
 class ChatCRUD:
