@@ -9,7 +9,7 @@ from sqlalchemy import select, update, func
 
 class UserCRUD:
     @staticmethod
-    async def create_new_user(db: AsyncSession, user_data: UserCreateSchema) -> Optional[User]:
+    async def create_new_user(db, user_data: UserCreateSchema) -> Optional[User]:
         # ← Асинхронная проверка на существование
         result = await db.execute(select(User).where(User.email == user_data.email))
         existing_user = result.scalar_one_or_none()
@@ -26,9 +26,8 @@ class UserCRUD:
         await db.refresh(new_user)
         return new_user
 
-
     @staticmethod
-    async def login_user(db: AsyncSession,  user_data: UserLoginSchema) -> Optional[User]:
+    async def login_user(db, user_data: UserLoginSchema) -> Optional[User]:
         result = await db.execute(select(User).where(User.email == user_data.email))
         user = result.scalar_one_or_none()
         if user and user.password == user_data.password:
@@ -37,20 +36,43 @@ class UserCRUD:
 
     @staticmethod
     #Асинхронное получение пользователя по email
-    async def get_user_by_email(db: AsyncSession, email: str) -> Optional[User]:
+    async def get_user_by_email(db, email: str) -> Optional[User]:
         query = select(User).filter(User.email == email)
         result = await db.execute(query)
         return result.scalar_one_or_none()
 
+    @staticmethod
+    async def get_user_free_tokens(db, email: str):
+        result = await db.execute(select(User).where(User.email == email))
+        user = result.scalar_one_or_none()
+
+        return user.user_free_tokens
+
+    @staticmethod
+    async def update_user_tokens(db, email: str):
+        result = await db.execute(select(User).where(User.email == email))
+        user = result.scalar_one_or_none()
+
+        if user.user_free_tokens <= 0:
+            user.user_free_tokens = 0
+            return False
+
+        user.user_free_tokens -= 1
+        await db.commit()
+        await db.refresh(user)
+
+        return True
+
+
     #================
     @staticmethod
-    async def get_by_stripe_customer_id(db: AsyncSession, customer_id: str) -> Optional[User]:
+    async def get_by_stripe_customer_id(db, customer_id: str) -> Optional[User]:
         #Находим пользователя по ID из Stripe (нужно для webhook)
         result = await db.execute(select(User).where(User.stripe_customer_id == customer_id))
         return result.scalar_one_or_none()
 
     @staticmethod
-    async def update_stripe_customer_id(db: AsyncSession, user:User, customer_id: str) -> Optional[User]:
+    async def update_stripe_customer_id(db, user:User, customer_id: str) -> Optional[User]:
         #Сохраняем customer_id после первого создания в Stripe
         user.stripe_customer_id = customer_id
         await db.commit()
@@ -58,7 +80,7 @@ class UserCRUD:
         return user
 
     @staticmethod
-    async def update_subscription(db: AsyncSession, user: User, subscription_id: Optional[str], status: str, period_end: Optional[datetime]) -> Optional[User]:
+    async def update_subscription(db, user: User, subscription_id: Optional[str], status: str, period_end: Optional[datetime]) -> Optional[User]:
         #Обновляем статус подписки после webhook от Stripe
         if subscription_id is not None:
             user.stripe_subscription_id = subscription_id
@@ -69,7 +91,7 @@ class UserCRUD:
         return user
 
     @staticmethod
-    async def is_subscription_active(db: AsyncSession, user: User) -> bool:
+    async def is_subscription_active(db, user: User) -> bool:
         if user.subscription_status != "active":
             return False
 

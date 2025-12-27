@@ -34,8 +34,6 @@ async def user_conversation(request, db, chat_id, text, auth_payload):
 
     # Получаем email из токена
     user_email = auth_payload.get("sub")
-    if not user_email:
-        return templates.TemplateResponse("login_page.html", {"request": request})
 
     # Находим пользователя по email
     user = await UserCRUD.get_user_by_email(db, user_email)
@@ -59,8 +57,26 @@ async def user_conversation(request, db, chat_id, text, auth_payload):
         conversation = await ChatCRUD.get_or_create_conversation(db, user.id)
         conversation_id_to_use = conversation.id
 
+    subscription = await UserCRUD.is_subscription_active(db, user)
+
+    if not subscription:
+        user_email = auth_payload.get("sub")
+        if_conversation_possible = await UserCRUD.update_user_tokens(db, user_email)
+        if not if_conversation_possible:
+            # Токены закончились → можно вернуть специальное сообщение
+            return templates.TemplateResponse("message.html", {
+                "request": request,
+                "user_text": text,
+                "ai_reply": "У вас закончились бесплатные токены. Подпишитесь на Premium или подождите завтрашнего обновления."
+            })
+
+    return await process_message(db, conversation_id_to_use, text, request)
+
+
+
+async def process_message(db, conversation_id, text, request):
     # Сохраняем сообщение пользователя
-    await ChatCRUD.add_message(db=db, conversation_id=conversation_id_to_use, role="user", content=text)
+    await ChatCRUD.add_message(db=db, conversation_id=conversation_id, role="user", content=text)
 
     # === ФИЛЬТР ===
     if not await is_psychology_related(text):
@@ -69,6 +85,6 @@ async def user_conversation(request, db, chat_id, text, auth_payload):
         reply = await groq_ai_answer(text)
 
     # Сохраняем сообщение AI
-    await ChatCRUD.add_message(db=db, conversation_id=conversation_id_to_use, role="assistant", content=reply)
+    await ChatCRUD.add_message(db=db, conversation_id=conversation_id, role="assistant", content=reply)
 
     return templates.TemplateResponse("message.html", {"request": request, "user_text": text, "ai_reply": reply})

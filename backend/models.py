@@ -18,7 +18,7 @@ class User(Base):
     subscription_status: Mapped[str] = mapped_column(String(50),default="inactive")  # active, trialing, past_due, canceled и т.д.
     subscription_current_period_end: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
     # Токены
-    user_free_tokens:Mapped[float] = mapped_column(Integer, default=3)
+    user_free_tokens:Mapped[float] = mapped_column(Integer, default=5)
     # Связь с чатами
     conversations: Mapped[list["Conversation"]] = relationship("Conversation", back_populates="user", cascade="all, delete-orphan")
 
