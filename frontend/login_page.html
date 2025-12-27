@@ -49,6 +49,12 @@
 <body>
 
 <div class="login-card">
+    <!-- Блок ошибки (появляется только при ошибке) -->
+      {% if error_message %}
+      <div class="alert alert-danger text-center mb-4" role="alert">
+        {{ error_message }}
+      </div>
+      {% endif %}
   <div class="text-center mb-4">
     <h4 class="fw-bold text-dark mb-2">Psychology AI</h4>
     <small class="text-muted">A calm space to talk, whenever you need</small>

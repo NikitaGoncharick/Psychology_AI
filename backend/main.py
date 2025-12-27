@@ -146,15 +146,10 @@ async def show_login_page(request: Request):
 
 @app.post("/login")
 async def login_user(request: Request, db: AsyncSession = Depends(get_db), email: str = Form(...), password: str = Form(...)):
-    try:
-        user_data = UserLoginSchema(email=email, password=password)
-    except ValidationError as e:
-        raise HTTPException(status_code=400, detail="Неверный email или пароль")
-
-    user = await UserCRUD.login_user(db, user_data) # ← должен возвращать User или None
+    # 1. Пытаемся авторизоваться
+    user = await UserCRUD.login_user(db, UserLoginSchema(email=email, password=password))
     if not user:
-        raise HTTPException(status_code=401, detail="Неверный email или пароль")
-
+        return templates.TemplateResponse("login_page.html", {"request": request, "error_message": "Неверный email или пароль"})
     return await create_token(user_email=user.email)
 
 @app.get("/register")
@@ -179,8 +174,8 @@ async def register_user(request: Request, db: AsyncSession = Depends(get_db), em
 
     return await create_token(user_email=email)
 
-@app.get("/contacts")
-async def show_contacts(request: Request, auth_payload: Optional[Dict] = Depends(auth_check)):
+@app.get("/about_us")
+async def show_about_us(request: Request, auth_payload: Optional[Dict] = Depends(auth_check)):
     if auth_payload:
         header_template = "partials/header_user.html"
         content_template = "partials/company_info.html"
