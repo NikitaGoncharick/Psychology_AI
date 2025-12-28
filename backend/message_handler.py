@@ -32,11 +32,11 @@ async def free_conversation(request: Request, text: str):
     redis = await get_redis(request)
 
     # Создаём уникальный ключ для гостя (IP + user-agent)
-    ip = request.client.host or "unknown"
-    ua = request.headers.get("user-agent", "unknown")
-    fingerprint = hashlib.sha256(f"{ip}:{ua}".encode()).hexdigest()[:16]
+    ip = request.client.host or "unknown" # Получаем IP-адрес клиента | Если по какой-то причине IP недоступен → будет "unknown"
+    ua = request.headers.get("user-agent", "unknown") # Берём User-Agent — строку, которую браузер/приложение сообщает о себе.
+    fingerprint = hashlib.sha256(f"{ip}:{ua}".encode()).hexdigest()[:16] # Создаём отпечаток из двух значений: IP + User-Agent | Превращаем в строку → кодируем в байты → считаем SHA-256| Берём только первые 16 символов хэша (64-битное значение)
 
-    redis_key = f"guest:msg_count:{fingerprint}"
+    redis_key = f"guest:msg_count:{fingerprint}" # Формируем ключ в Redis в пространстве имён, чтобы не засорять всё пространство ключей
 
     count = await redis.get(redis_key)
     count = int(count) if count else 0
@@ -52,14 +52,13 @@ async def free_conversation(request: Request, text: str):
     else:
         reply = await groq_ai_answer(text)
 
-    # Увеличиваем счётчик и ставим TTL = 5 минут (можно увеличить)
-    await redis.incr(redis_key)
-    await redis.exists(redis_key, 300) # 300 секунд
+    # Увеличиваем счётчик и ставим TTL = 5 минут | Если в течение таймера пользователь не пишет → ключ автоматически удаляется Redis-ом
+    await redis.incr(redis_key) # Атомарно увеличиваем значение счётчика на 1 (если ключа не существовало → создастся со значением 1)
+    await redis.expire(redis_key, 300) # Устанавливаем ключ на 300 секунд
 
     response = templates.TemplateResponse(
         "message.html",
-        {"request": request, "user_text": text, "ai_reply": reply}
-    )
+        {"request": request, "user_text": text, "ai_reply": reply})
 
     return response
 

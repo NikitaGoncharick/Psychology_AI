@@ -23,15 +23,10 @@ from billing import create_session_checkout, price_IDS, handle_webhook_event
 import message_handler
 import profile_handler
 
-# Объявляем глобальную переменную на уровне модуля
-redis_client: Redis | None = None
-REDIS_URL = "redis://localhost:6379/0"
-
+# Startup
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Startup
     print("✅ Инициализация приложения")
-
 
     # 1. Подключаемся к БД и создаем таблицы
     async with engine.begin() as conn:
@@ -40,8 +35,7 @@ async def lifespan(app: FastAPI):
 
     # 2. Загружаем конфигурацию
 
-    # 3. Подключаемся к Redis
-    # Создаём Redis и кладём прямо в app.state
+    # 3. Подключаемся к Redis ( Создаём Redis и кладём прямо в app.state )
     try:
         app.state.redis = Redis.from_url(
             "redis://localhost:6379/0",
@@ -52,7 +46,7 @@ async def lifespan(app: FastAPI):
             retry_on_timeout=True,
             health_check_interval=30
         )
-        await app.state.redis.ping()
+        await app.state.redis.ping() # проверяем коннект сразу
         print("✅ Redis успешно подключен")
     except RedisError as e:
         print(f"⚠️ Не удалось подключиться к Redis: {e}")
@@ -63,8 +57,8 @@ async def lifespan(app: FastAPI):
     # Shutdown
     print("🛑 Очистка ресурсов...")
     # 1. Закрываем Redis
-    if redis_client is not None:
-        await redis_client.close()
+    if hasattr(app.state, 'redis') and app.state.redis is not None:
+        await app.state.redis.close()
         print("Redis соединение закрыто")
     # 2. Закрываем соединения с БД
 
