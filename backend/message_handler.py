@@ -63,12 +63,13 @@ async def user_conversation(request, db, chat_id, text, auth_payload):
         user_email = auth_payload.get("sub")
         if_conversation_possible = await UserCRUD.update_user_tokens(db, user_email)
         if not if_conversation_possible:
-            # Токены закончились → можно вернуть специальное сообщение
-            return templates.TemplateResponse("message.html", {
-                "request": request,
-                "user_text": text,
-                "ai_reply": "У вас закончились бесплатные токены. Подпишитесь на Premium или подождите завтрашнего обновления."
-            })
+            # Токены закончились → показываем модалку
+            return HTMLResponse("""
+                        <script>
+                            var modal = new bootstrap.Modal(document.getElementById('tokensEndedModal'));
+                            modal.show();
+                        </script>
+                    """)
 
     return await process_message(db, conversation_id_to_use, text, request)
 

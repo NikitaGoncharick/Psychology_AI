@@ -386,6 +386,69 @@
     </div>
 </div>
 
+
+<!-- Модальное окно: конец бесплатных токенов для зарегистрированных пользователей -->
+<div class="modal fade" id="tokensEndedModal" tabindex="-1" aria-labelledby="tokensEndedModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-md">
+    <div class="modal-content border-0 shadow-xl rounded-24 overflow-hidden bg-white"
+         style="max-width: 420px; border-radius: 28px;">
+
+      <!-- Градиентный хедер -->
+      <div class="text-white text-center pt-5 pb-4 position-relative"
+           style="background: linear-gradient(135deg, #4a9086 0%, #6ab5a8 100%); border-radius: 28px 28px 0 0;">
+
+        <!-- Иконка сверху -->
+        <div class="position-absolute start-50 translate-middle-x" style="top: 5px;">
+          <div class="rounded-circle bg-white bg-opacity-25 p-3 d-flex align-items-center justify-content-center shadow-lg"
+               style="width: 96px; height: 96px; border: 5px solid rgba(255,255,255,0.3);">
+            <i class="fs-2">⏳</i>
+          </div>
+        </div>
+
+        <h4 class="fw-bold mb-2 mt-5 pt-3" id="tokensEndedModalLabel" style="font-size: 1.65rem;">
+          Free tokens ran out
+        </h4>
+        <p class="mb-0 opacity-90" style="font-size: 1.1rem;">
+          Thanks for chatting with me today
+        </p>
+      </div>
+
+      <!-- Основное содержимое -->
+      <div class="modal-body px-5 py-5 text-center">
+        <p class="lead text-muted mb-4" style="font-size: 1.15rem; line-height: 1.45;">
+          You've used all your free daily messages.
+        </p>
+
+        <!-- Кнопки -->
+        <div class="d-grid gap-3 mx-auto" style="max-width: 340px;">
+          <a href="/pricing"
+             class="btn btn-lg fw-semibold py-3 rounded-3 text-white"
+             style="
+               background: #4a9086;
+               border: none;
+               box-shadow: 0 6px 20px rgba(74, 144, 134, 0.3);
+               transition: all 0.3s ease;
+             "
+             onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 12px 32px rgba(74,144,134,0.45)'"
+             onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 6px 20px rgba(74,144,134,0.3)'">
+            Upgrade to Premium
+          </a>
+
+          <button type="button"
+                  class="btn btn-outline-secondary btn-lg py-3 rounded-3"
+                  data-bs-dismiss="modal">
+            Maybe later
+          </button>
+        </div>
+
+        <small class="text-muted mt-4 d-block" style="font-size: 0.95rem;">
+          Premium starts from <strong>$4/month</strong>
+        </small>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
     // Глобальные переменные — ОДНИ на весь скрипт
     let currentAction = null;  // 'rename' или 'delete'
