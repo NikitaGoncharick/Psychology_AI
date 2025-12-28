@@ -65,6 +65,7 @@ async def lifespan(app: FastAPI):
     print("👋 Приложение остановлено...")
 
 app = FastAPI(lifespan=lifespan)
+
 templates = Jinja2Templates(
     directory="../frontend",
     loader=jinja2.ChoiceLoader([
@@ -103,13 +104,13 @@ async def auth_check(request: Request) -> Optional[Dict]: # auth_payload мож�
 
     return payload
 
-async def create_token(user_email: str, redirect_url: str = '/'):
+async def create_token(user_email: str, redirect_url: str = '/conversations'):
     access_token = create_access_token(data={'sub': user_email})
     response = RedirectResponse(url=redirect_url, status_code=303)
     response.set_cookie("access_token", value=access_token, httponly=True, samesite='lax', secure=True, max_age=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60)
     return response
 
-@app.get("/home")
+@app.get("/")
 async def show_home(request: Request, auth_payload: Optional[Dict] = Depends(auth_check)):
     if auth_payload:
         header_template = "partials/header_user.html"
@@ -119,7 +120,7 @@ async def show_home(request: Request, auth_payload: Optional[Dict] = Depends(aut
         content_template = "partials/promo.html"
 
     return templates.TemplateResponse("home_page.html", {"request": request, "header_template": header_template, "content_template": content_template})
-@app.get("/")
+@app.get("/conversations")
 async def root(request: Request, active_chat_id: Optional[int] = None, auth_payload: Optional[Dict] = Depends(auth_check), db: AsyncSession = Depends(get_db)):
     if auth_payload:
         header_template = "partials/header_user.html"
@@ -272,7 +273,7 @@ async def create_new_conversation(request: Request,auth_payload: Optional[Dict] 
     user = await UserCRUD.get_user_by_email(db, user_email)
     new_conversation = await ChatCRUD.create_new_conversation(db, user.id)
 
-    return RedirectResponse(url=f"/?chat_id={new_conversation.id}", status_code=303)
+    return RedirectResponse(url=f"/conversations?chat_id={new_conversation.id}", status_code=303)
 
 @app.post("/conversations/switch-chat")
 async def switch_chat(request: Request, chat_id: int = Form(...), db: AsyncSession = Depends(get_db), auth_payload: Optional[Dict] = Depends(auth_check)):
@@ -285,7 +286,7 @@ async def switch_chat(request: Request, chat_id: int = Form(...), db: AsyncSessi
     # Проверяем, что чат принадлежит пользователю
     is_owner = await ChatCRUD.is_conversation_owner(db, chat_id, user_data.id)
     if not is_owner:
-        return RedirectResponse(url="/", status_code=303)
+        return RedirectResponse(url="/conversations", status_code=303)
 
     # Получаем сообщения выбранного чата
     messages = await ChatCRUD.get_messages(db, chat_id)
@@ -309,7 +310,7 @@ async def delete_conversation(request: Request, conversation_id: int = Form(...)
     if not success:
         raise HTTPException(status_code=404, detail="Chat not found or access denied")
 
-    return RedirectResponse(url="/", status_code=303)
+    return RedirectResponse(url="/conversations", status_code=303)
 
 @app.post("/conversations/rename_conversation")
 async def rename_conversation(conversation_id: int = Form(...), new_name: str = Form(...), db: AsyncSession = Depends(get_db), auth_payload: Optional[Dict] = Depends(auth_check)):
@@ -320,7 +321,7 @@ async def rename_conversation(conversation_id: int = Form(...), new_name: str = 
     if not success:
         raise HTTPException(status_code=404, detail="Chat not found or access denied")
 
-    return RedirectResponse(url="/", status_code=303)
+    return RedirectResponse(url="/conversations", status_code=303)
 
 @app.post("/create-checkout-session")
 async def create_checkout(request: Request,db: AsyncSession = Depends(get_db), auth_payload: Optional[Dict] = Depends(auth_check), plan_type: str = Form("plan_type"), ):
