@@ -1,30 +1,69 @@
 from fastapi import Request
 from fastapi.responses import HTMLResponse
 from groq_api import groq_ai_answer
-from main import templates
+from main import templates, get_redis
 from crud import UserCRUD, ChatCRUD
 from question_control import is_psychology_related
 
+import hashlib
+
+# async def free_conversation(request: Request, text: str):
+#     message_count = int(request.cookies.get("guest_messages", "0"))  # Читаем cookie с счётчиком (по умолчанию 0)
+#     if message_count >= 3:
+#         return HTMLResponse("""
+#                     <script>
+#                         var modal = new bootstrap.Modal(document.getElementById('guestLimitModal'));
+#                         modal.show();
+#                     </script> """)
+#     else:
+#         new_count = message_count + 1
+#
+#         # === ФИЛЬТР ===
+#         if not await is_psychology_related(text):
+#             reply = "Sorry, I specialize only in topics related to psychology, emotions, relationships, and personal growth. 😊 Tell me what's bothering or worrying you — I'm here to support you."
+#         else:
+#             reply = await groq_ai_answer(text)
+#
+#         response = templates.TemplateResponse("message.html", {"request": request, "user_text": text, "ai_reply": reply})
+#         response.set_cookie(key = "guest_messages", value = str(new_count), max_age = 60, httponly=True, samesite="lax")
+#         return response
+
 async def free_conversation(request: Request, text: str):
-    message_count = int(request.cookies.get("guest_messages", "0"))  # Читаем cookie с счётчиком (по умолчанию 0)
-    if message_count >= 3:
-        return HTMLResponse("""
-                    <script>
+    redis = await get_redis(request)
+
+    # Создаём уникальный ключ для гостя (IP + user-agent)
+    ip = request.client.host or "unknown"
+    ua = request.headers.get("user-agent", "unknown")
+    fingerprint = hashlib.sha256(f"{ip}:{ua}".encode()).hexdigest()[:16]
+
+    redis_key = f"guest:msg_count:{fingerprint}"
+
+    count = await redis.get(redis_key)
+    count = int(count) if count else 0
+
+    if count >= 3:
+        return HTMLResponse(""" <script>
                         var modal = new bootstrap.Modal(document.getElementById('guestLimitModal'));
                         modal.show();
-                    </script> """)
+                                </script>  """)
+    # === ФИЛЬТР ===
+    if not await is_psychology_related(text):
+        reply = "Sorry, I specialize only in topics related to psychology..."
     else:
-        new_count = message_count + 1
+        reply = await groq_ai_answer(text)
 
-        # === ФИЛЬТР ===
-        if not await is_psychology_related(text):
-            reply = "Sorry, I specialize only in topics related to psychology, emotions, relationships, and personal growth. 😊 Tell me what's bothering or worrying you — I'm here to support you."
-        else:
-            reply = await groq_ai_answer(text)
+    # Увеличиваем счётчик и ставим TTL = 5 минут (можно увеличить)
+    await redis.incr(redis_key)
+    await redis.exists(redis_key, 300) # 300 секунд
 
-        response = templates.TemplateResponse("message.html", {"request": request, "user_text": text, "ai_reply": reply})
-        response.set_cookie(key = "guest_messages", value = str(new_count), max_age = 60, httponly=True, samesite="lax")
-        return response
+    response = templates.TemplateResponse(
+        "message.html",
+        {"request": request, "user_text": text, "ai_reply": reply}
+    )
+
+    return response
+
+
 
 
 async def user_conversation(request, db, chat_id, text, auth_payload):

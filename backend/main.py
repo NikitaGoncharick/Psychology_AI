@@ -1,6 +1,7 @@
 # main.py
 from contextlib import asynccontextmanager
 
+from redis.asyncio import Redis, RedisError
 import jinja2
 import markdown
 import stripe
@@ -13,7 +14,6 @@ from starlette.responses import JSONResponse, RedirectResponse
 from starlette.templating import Jinja2Templates
 from typing import Optional, Dict
 
-
 from config import settings
 from database import engine, get_db
 from models import Base  # Base уже с зарегистрированными моделями
@@ -23,11 +23,15 @@ from billing import create_session_checkout, price_IDS, handle_webhook_event
 import message_handler
 import profile_handler
 
+# Объявляем глобальную переменную на уровне модуля
+redis_client: Redis | None = None
+REDIS_URL = "redis://localhost:6379/0"
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Startup
     print("✅ Инициализация приложения")
+
 
     # 1. Подключаемся к БД и создаем таблицы
     async with engine.begin() as conn:
@@ -35,13 +39,33 @@ async def lifespan(app: FastAPI):
     print("✅ Таблицы созданы/проверены")
 
     # 2. Загружаем конфигурацию
+
     # 3. Подключаемся к Redis
+    # Создаём Redis и кладём прямо в app.state
+    try:
+        app.state.redis = Redis.from_url(
+            "redis://localhost:6379/0",
+            encoding="utf-8",
+            decode_responses=True,
+            socket_timeout=5,
+            socket_connect_timeout=5,
+            retry_on_timeout=True,
+            health_check_interval=30
+        )
+        await app.state.redis.ping()
+        print("✅ Redis успешно подключен")
+    except RedisError as e:
+        print(f"⚠️ Не удалось подключиться к Redis: {e}")
+        app.state.redis = None
 
     yield #Здесь приложение работает
 
     # Shutdown
     print("🛑 Очистка ресурсов...")
     # 1. Закрываем Redis
+    if redis_client is not None:
+        await redis_client.close()
+        print("Redis соединение закрыто")
     # 2. Закрываем соединения с БД
 
     print("👋 Приложение остановлено...")
@@ -60,6 +84,19 @@ templates.env.filters["markdown"] = lambda text: markdown.markdown(
     text,
     extensions=["nl2br", "fenced_code"]
 )
+
+#Зависимость для получения Redis клиента
+async def get_redis(request: Request) -> Redis:
+    if not hasattr(request.app.state, 'redis') or request.app.state.redis is None:
+        raise HTTPException(status_code=503, detail="Redis unavailable")
+
+        # Дополнительная проверка живости (опционально, но полезно)
+    try:
+        await request.app.state.redis.ping()
+        return request.app.state.redis
+    except RedisError:
+        raise HTTPException(status_code=503, detail="Redis connection lost")
+
 
 async def auth_check(request: Request) -> Optional[Dict]: # auth_payload может быть либо словарем (dict), либо None
     token = request.cookies.get("access_token")
@@ -192,8 +229,6 @@ async def show_profile_page(request: Request, auth_payload: Optional[Dict] = Dep
 
     header_template = "partials/header_user.html"
     content_template = "partials/user_info.html"
-
-    print(profile_data)
 
     return templates.TemplateResponse("profile_page.html", {"request": request, "header_template": header_template, "content_template": content_template,
                                                             "profile_data": profile_data})
