@@ -41,7 +41,7 @@ async def free_conversation(request: Request, text: str):
     count = await redis.get(redis_key)
     count = int(count) if count else 0
 
-    if count >= 5:
+    if count >= 3:
         return HTMLResponse(""" <script>
                         var modal = new bootstrap.Modal(document.getElementById('guestLimitModal'));
                         modal.show();
@@ -54,7 +54,7 @@ async def free_conversation(request: Request, text: str):
 
     # Увеличиваем счётчик и ставим TTL = 5 минут | Если в течение таймера пользователь не пишет → ключ автоматически удаляется Redis-ом
     await redis.incr(redis_key) # Атомарно увеличиваем значение счётчика на 1 (если ключа не существовало → создастся со значением 1)
-    await redis.expire(redis_key, 20) # Устанавливаем ключ на 300 секунд
+    await redis.expire(redis_key, 60) # Устанавливаем ключ на 300 секунд
 
     response = templates.TemplateResponse(
         "message.html",

@@ -321,7 +321,7 @@
         <h3>Change Password</h3>
         <p>Enter your new password below</p>
 
-        <form id="change-password-form" action="/profile/change-password" method="POST">
+        <form id="change-password-form" action="/profile/change_password" method="POST">
             <input
                 type="password"
                 name="new_password"
@@ -330,15 +330,6 @@
                 required
                 minlength="6"
             >
-            <input
-                type="password"
-                name="new_password_confirm"
-                class="modal-rename-input"
-                placeholder="Confirm new password"
-                required
-                minlength="6"
-            >
-
             <div class="modal-actions mt-4">
                 <button type="button" class="btn-cancel" onclick="closePasswordModal()">Cancel</button>
                 <button type="submit" class="btn-action">Change Password</button>

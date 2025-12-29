@@ -244,6 +244,25 @@ async def delete_profile(request: Request, db: AsyncSession = Depends(get_db), a
     response.delete_cookie(key="access_token", httponly=True, samesite="lax", secure=True)
     return response
 
+@app.post("/profile/change_password")
+async def change_user_password(request: Request, db: AsyncSession = Depends(get_db), auth_payload: Optional[Dict] = Depends(auth_check),new_password: str = Form(...)):
+    if not auth_payload:
+        return templates.TemplateResponse("login_page.html", {"request": request})
+
+    user_email = auth_payload["sub"]
+    user_data = await UserCRUD.get_user_by_email(db, user_email)
+    profile_data = await profile_handler.get_profile_data(request, db, user_data)
+
+    await UserCRUD.change_password(db, user_data, new_password)
+
+    header_template = "partials/header_user.html"
+    content_template = "partials/user_info.html"
+
+    return templates.TemplateResponse("profile_page.html", {"request": request, "header_template": header_template,
+                                                            "content_template": content_template,
+                                                            "profile_data": profile_data})
+
+
 @app.post("/profile/log_out")
 async def logout(request: Request, auth_payload: Optional[Dict] = Depends(auth_check)):
     if not auth_payload:
