@@ -14,7 +14,8 @@ from starlette.responses import JSONResponse, RedirectResponse
 from starlette.templating import Jinja2Templates
 from typing import Optional, Dict
 
-from config import settings
+#from config import settings
+from .config import settings
 from database import engine, get_db
 from models import Base  # Base уже с зарегистрированными моделями
 from crud import UserCRUD, UserCreateSchema, UserLoginSchema, ChatCRUD
@@ -28,7 +29,6 @@ import profile_handler
 async def lifespan(app: FastAPI):
     print("GROQ_API_KEY:", settings.GROQ_API_KEY)
     print("STRIPE_WEBHOOK_SECRET:", settings.STRIPE_WEBHOOK_SECRET)
-
     print("✅ Инициализация приложения")
 
     # 1. Подключаемся к БД и создаем таблицы
