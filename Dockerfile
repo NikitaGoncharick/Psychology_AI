@@ -9,4 +9,4 @@ COPY . .
 
 ENV PORT=8000
 
-CMD ["gunicorn", "--bind", "0.0.0.0:${PORT}", "backend.main:app", "--workers", "2", "--timeout", "120"]
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "backend.main:app", "--workers", "2", "--timeout", "120"]
