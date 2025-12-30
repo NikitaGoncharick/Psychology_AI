@@ -7,6 +7,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
+# Переходим внутрь backend перед запуском
+WORKDIR /app/backend
+
 ENV PORT=8000
 
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "backend.main:app", "--workers", "2", "--timeout", "120"]
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "main:app", "--workers", "2", "--timeout", "120"]
