@@ -26,6 +26,9 @@ import profile_handler
 # Startup
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    print("GROQ_API_KEY:", settings.GROQ_API_KEY)
+    print("STRIPE_WEBHOOK_SECRET:", settings.STRIPE_WEBHOOK_SECRET)
+
     print("✅ Инициализация приложения")
 
     # 1. Подключаемся к БД и создаем таблицы
