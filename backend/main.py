@@ -373,11 +373,5 @@ if __name__ == "__main__":
     import os
     import uvicorn
 
-    port = int(os.getenv("PORT", 8000))  # Railway подставит свой порт
-    uvicorn.run(
-        "app.main:app",  # или просто "main:app", зависит от структуры
-        host="0.0.0.0",  # обязательно 0.0.0.0, а не 127.0.0.1
-        port=port,
-        reload=False,  # в проде reload=False
-        workers=2  # можно 2–4, в зависимости от плана
-    )
+    port = int(os.getenv("PORT", 8000))
+    uvicorn.run("backend.main:app", host="0.0.0.0", port=port, reload=False, workers=2)
