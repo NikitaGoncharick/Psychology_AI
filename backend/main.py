@@ -38,30 +38,30 @@ async def lifespan(app: FastAPI):
     # 2. Загружаем конфигурацию
 
     # 3. Подключаемся к Redis ( Создаём Redis и кладём прямо в app.state )
-    # try:
-    #     app.state.redis = Redis.from_url(
-    #         "redis://localhost:6379/0",
-    #         encoding="utf-8",
-    #         decode_responses=True,
-    #         socket_timeout=5,
-    #         socket_connect_timeout=5,
-    #         retry_on_timeout=True,
-    #         health_check_interval=30
-    #     )
-    #     await app.state.redis.ping() # проверяем коннект сразу
-    #     print("✅ Redis успешно подключен")
-    # except RedisError as e:
-    #     print(f"⚠️ Не удалось подключиться к Redis: {e}")
-    #     app.state.redis = None
+    try:
+        app.state.redis = Redis.from_url(
+            "redis://localhost:6379/0",
+            encoding="utf-8",
+            decode_responses=True,
+            socket_timeout=5,
+            socket_connect_timeout=5,
+            retry_on_timeout=True,
+            health_check_interval=30
+        )
+        await app.state.redis.ping() # проверяем коннект сразу
+        print("✅ Redis успешно подключен")
+    except RedisError as e:
+        print(f"⚠️ Не удалось подключиться к Redis: {e}")
+        app.state.redis = None
 
     yield #Здесь приложение работает
 
     # Shutdown
     print("🛑 Очистка ресурсов...")
     # 1. Закрываем Redis
-    # if hasattr(app.state, 'redis') and app.state.redis is not None:
-    #     await app.state.redis.close()
-    #     print("Redis соединение закрыто")
+    if hasattr(app.state, 'redis') and app.state.redis is not None:
+        await app.state.redis.close()
+        print("Redis соединение закрыто")
     # 2. Закрываем соединения с БД
 
     print("👋 Приложение остановлено...")
@@ -371,9 +371,9 @@ async def stripe_webhook(request: Request, db: AsyncSession = Depends(get_db)):
 
 
 if __name__ == "__main__":
-    #uvicorn.run(app, host="127.0.0.1", port=8000)
-    import os
-    import uvicorn
-
-    port = int(os.getenv("PORT", 8000))
-    uvicorn.run("backend.main:app", host="0.0.0.0", port=port, reload=False, workers=2)
+    uvicorn.run(app, host="127.0.0.1", port=8000)
+    # import os
+    # import uvicorn
+    #
+    # port = int(os.getenv("PORT", 8000))
+    # uvicorn.run("backend.main:app", host="0.0.0.0", port=port, reload=False, workers=2)

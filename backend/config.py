@@ -11,13 +11,13 @@ class Settings(BaseSettings):
     STRIPE_WEBHOOK_SECRET: str
 
     model_config = {
-        # "env_file": ".env",
-        # "env_file_encoding": "utf-8"
+        "env_file": ".env",
+        "env_file_encoding": "utf-8"
         #Настройка для сервера
-        "env_file": None,  # ← Убираем .env, чтобы не искал файл
-        "env_file_encoding": "utf-8",
-        "case_sensitive": False,  # ← Опционально, но полезно
-        "extra": "ignore"  # ← Игнорирует лишние переменные
+        # "env_file": None,  # ← Убираем .env, чтобы не искал файл
+        # "env_file_encoding": "utf-8",
+        # "case_sensitive": False,  # ← Опционально, но полезно
+        # "extra": "ignore"  # ← Игнорирует лишние переменные
     }
 
 settings = Settings() # автоматически берёт из .env или окружения
