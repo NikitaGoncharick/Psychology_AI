@@ -13,8 +13,11 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 
-# Копируем ВСЁ из корня проекта (где лежат backend/, requirements.txt и др.)
+# Копируем ВСЁ
 COPY . .
+
+# ЯВНО копируем config.py в корень (на всякий случай)
+COPY config.py /app/config.py
 
 # Создаем non-root пользователя
 RUN useradd -m -u 1000 appuser && chown -R appuser:appuser /app
