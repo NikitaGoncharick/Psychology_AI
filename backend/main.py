@@ -5,12 +5,11 @@ from redis.asyncio import Redis, RedisError
 import jinja2
 import markdown
 import stripe
-import uvicorn
 from fastapi import FastAPI, Request, Form, Depends, HTTPException
 
 
 from sqlalchemy.ext.asyncio import AsyncSession
-from starlette.responses import JSONResponse, RedirectResponse
+from starlette.responses import RedirectResponse
 from starlette.templating import Jinja2Templates
 from typing import Optional, Dict
 
@@ -376,7 +375,7 @@ if __name__ == "__main__":
 
     port = int(os.getenv("PORT", 8000))
     uvicorn.run(
-        "main:app",
+        "backend.main:app",
         host="0.0.0.0",  # Важно: 0.0.0.0, а не 127.0.0.1
         port=port,
         reload=False

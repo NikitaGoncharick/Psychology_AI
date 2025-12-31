@@ -13,10 +13,8 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 
-# Копируем ТОЛЬКО нужные файлы
-COPY backend/ /app/backend/
-# Выносим config.py в корень для правильного импорта
-COPY backend/config.py /app/config.py
+# Копируем ВСЁ из корня проекта (где лежат backend/, requirements.txt и др.)
+COPY . .
 
 # Создаем non-root пользователя
 RUN useradd -m -u 1000 appuser && chown -R appuser:appuser /app
@@ -25,5 +23,5 @@ USER appuser
 # Открываем порт
 EXPOSE 8000
 
-# Команда запуска - указываем правильный путь к main.py
+# Команда запуска
 CMD ["uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "8000"]

@@ -4,8 +4,7 @@ import stripe
 from config import settings
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from models import User
-from crud import UserCRUD, UserCreateSchema, UserLoginSchema, ChatCRUD
+from crud import UserCRUD
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 

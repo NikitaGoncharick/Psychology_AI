@@ -41,7 +41,7 @@ class Settings(BaseSettings):
 
     # Для Railway - использовать env vars напрямую
     class Config:
-        env_file = ".env"
+        env_file = "backend/.env"
         env_file_encoding = "utf-8"
         case_sensitive = False
         extra = "ignore"
