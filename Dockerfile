@@ -2,7 +2,7 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-# Устанавливаем системные зависимости для PostgreSQL и других пакетов
+# Устанавливаем системные зависимости
 RUN apt-get update && apt-get install -y \
     gcc \
     postgresql-client \
@@ -13,15 +13,17 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 
-# Копируем весь проект
-COPY . .
+# Копируем ТОЛЬКО нужные файлы
+COPY backend/ /app/backend/
+# Выносим config.py в корень для правильного импорта
+COPY backend/config.py /app/config.py
 
-# Создаем non-root пользователя для безопасности
+# Создаем non-root пользователя
 RUN useradd -m -u 1000 appuser && chown -R appuser:appuser /app
 USER appuser
 
 # Открываем порт
 EXPOSE 8000
 
-# Команда запуска
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Команда запуска - указываем правильный путь к main.py
+CMD ["uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "8000"]
