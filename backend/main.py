@@ -1,6 +1,9 @@
 # main.py
-from contextlib import asynccontextmanager
+import sys
+import os
+sys.path.insert(0, os.path.dirname(__file__))
 
+from contextlib import asynccontextmanager
 from redis.asyncio import Redis, RedisError
 import jinja2
 import markdown
