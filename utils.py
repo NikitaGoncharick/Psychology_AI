@@ -1,10 +1,10 @@
+#Для рещения проблемы с цикличным импортом
 import jinja2
 import markdown
 from fastapi.templating import Jinja2Templates
 from fastapi import Request, HTTPException
 from redis.asyncio import Redis, RedisError
 from redis.asyncio import Redis
-
 
 templates = Jinja2Templates(
     directory="../frontend",
