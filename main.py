@@ -31,6 +31,8 @@ import profile_handler
 async def lifespan(app: FastAPI):
     print("GROQ_API_KEY:", settings.GROQ_API_KEY)
     print("STRIPE_WEBHOOK_SECRET:", settings.STRIPE_WEBHOOK_SECRET)
+    print("REDIS_URL:", settings.REDIS_URL)  # Добавьте эту строку для отладки
+    print("REDIS_PUBLIC_URL:", settings.REDIS_PUBLIC_URL)  # И эту
     print("✅ Инициализация приложения")
 
     # 1. Подключаемся к БД и создаем таблицы
@@ -41,8 +43,8 @@ async def lifespan(app: FastAPI):
     # 2. Загружаем конфигурацию
 
     # 3. Подключаемся к облачному Redis ( Создаём Redis и кладём прямо в app.state )
-    #redis_url = settings.REDIS_PUBLIC_URL or settings.REDIS_URL
-    redis_url = os.getenv("REDIS_PUBLIC_URL")
+    redis_url = settings.REDIS_PUBLIC_URL or settings.REDIS_URL
+    #redis_url = settings.REDIS_URL
 
     if not redis_url:
         print("⚠️ ВНИМАНИЕ: Redis URL не найден! Работаем без Redis.")
