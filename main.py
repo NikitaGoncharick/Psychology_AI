@@ -2,15 +2,13 @@
 
 from contextlib import asynccontextmanager
 from redis.asyncio import Redis, RedisError
-import jinja2
-import markdown
 import stripe
 from fastapi import FastAPI, Request, Form, Depends, HTTPException
 
 
 from sqlalchemy.ext.asyncio import AsyncSession
-from starlette.responses import RedirectResponse
-from starlette.templating import Jinja2Templates
+from fastapi.responses import RedirectResponse
+from fastapi.templating import Jinja2Templates
 from typing import Optional, Dict
 
 from config import settings
@@ -19,6 +17,7 @@ from models import Base  # Base уже с зарегистрированными
 from crud import UserCRUD, UserCreateSchema, UserLoginSchema, ChatCRUD
 from auth import create_access_token, decode_token
 from billing import create_session_checkout, price_IDS, handle_webhook_event
+from utils import templates
 import message_handler
 import profile_handler
 
@@ -37,61 +36,47 @@ async def lifespan(app: FastAPI):
     # 2. Загружаем конфигурацию
 
     # 3. Подключаемся к Redis ( Создаём Redis и кладём прямо в app.state )
-    try:
-        app.state.redis = Redis.from_url(
-            "redis://localhost:6379/0",
-            encoding="utf-8",
-            decode_responses=True,
-            socket_timeout=5,
-            socket_connect_timeout=5,
-            retry_on_timeout=True,
-            health_check_interval=30
-        )
-        await app.state.redis.ping() # проверяем коннект сразу
-        print("✅ Redis успешно подключен")
-    except RedisError as e:
-        print(f"⚠️ Не удалось подключиться к Redis: {e}")
-        app.state.redis = None
+    # try:
+    #     app.state.redis = Redis.from_url(
+    #         "redis://localhost:6379/0",
+    #         encoding="utf-8",
+    #         decode_responses=True,
+    #         socket_timeout=5,
+    #         socket_connect_timeout=5,
+    #         retry_on_timeout=True,
+    #         health_check_interval=30
+    #     )
+    #     await app.state.redis.ping() # проверяем коннект сразу
+    #     print("✅ Redis успешно подключен")
+    # except RedisError as e:
+    #     print(f"⚠️ Не удалось подключиться к Redis: {e}")
+    #     app.state.redis = None
 
     yield #Здесь приложение работает
 
     # Shutdown
     print("🛑 Очистка ресурсов...")
     # 1. Закрываем Redis
-    if hasattr(app.state, 'redis') and app.state.redis is not None:
-        await app.state.redis.close()
-        print("Redis соединение закрыто")
+    # if hasattr(app.state, 'redis') and app.state.redis is not None:
+    #     await app.state.redis.close()
+    #     print("Redis соединение закрыто")
     # 2. Закрываем соединения с БД
 
     print("👋 Приложение остановлено...")
 
 app = FastAPI(lifespan=lifespan)
 
-templates = Jinja2Templates(
-    directory="../frontend",
-    loader=jinja2.ChoiceLoader([
-        jinja2.FileSystemLoader("frontend"),
-        jinja2.FileSystemLoader("frontend/partials"),
-    ])
-)
-
-# Регистрация фильтра Markdown для красивого рендеринга ответов ИИ
-templates.env.filters["markdown"] = lambda text: markdown.markdown(
-    text,
-    extensions=["nl2br", "fenced_code"]
-)
-
 #Зависимость для получения Redis клиента
-async def get_redis(request: Request) -> Redis:
-    if not hasattr(request.app.state, 'redis') or request.app.state.redis is None:
-        raise HTTPException(status_code=503, detail="Redis unavailable")
-
-        # Дополнительная проверка живости (опционально, но полезно)
-    try:
-        await request.app.state.redis.ping()
-        return request.app.state.redis
-    except RedisError:
-        raise HTTPException(status_code=503, detail="Redis connection lost")
+# async def get_redis(request: Request) -> Redis:
+#     if not hasattr(request.app.state, 'redis') or request.app.state.redis is None:
+#         raise HTTPException(status_code=503, detail="Redis unavailable")
+#
+#         # Дополнительная проверка живости (опционально, но полезно)
+#     try:
+#         await request.app.state.redis.ping()
+#         return request.app.state.redis
+#     except RedisError:
+#         raise HTTPException(status_code=503, detail="Redis connection lost")
 
 
 async def auth_check(request: Request) -> Optional[Dict]: # auth_payload может быть либо словарем (dict), либо None
@@ -376,7 +361,7 @@ if __name__ == "__main__":
     port = int(os.getenv("PORT", 8000))
     uvicorn.run(
         "main:app", #backend.main:app
-        host="0.0.0.0",  # Важно: 0.0.0.0, а не 127.0.0.1
+        host="127.0.0.1",  # Важно: 0.0.0.0, а не 127.0.0.1
         port=port,
         reload=False
     )

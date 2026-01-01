@@ -1,7 +1,7 @@
 from fastapi import Request
 from fastapi.responses import HTMLResponse
 from groq_api import groq_ai_answer
-from main import templates, get_redis
+from utils import get_redis, templates
 from crud import UserCRUD, ChatCRUD
 from question_control import is_psychology_related
 
