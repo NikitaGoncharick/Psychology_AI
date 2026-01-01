@@ -1,6 +1,3 @@
-from fastapi import Request
-from fastapi.responses import HTMLResponse
-from crud import UserCRUD, ChatCRUD
 import billing
 
 async def get_profile_data(request, db, user_data):

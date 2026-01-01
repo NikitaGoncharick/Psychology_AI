@@ -1,7 +1,4 @@
 # main.py
-import sys
-import os
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from contextlib import asynccontextmanager
 from redis.asyncio import Redis, RedisError
@@ -73,8 +70,8 @@ app = FastAPI(lifespan=lifespan)
 templates = Jinja2Templates(
     directory="../frontend",
     loader=jinja2.ChoiceLoader([
-        jinja2.FileSystemLoader("../frontend"),
-        jinja2.FileSystemLoader("../frontend/partials"),
+        jinja2.FileSystemLoader("frontend"),
+        jinja2.FileSystemLoader("frontend/partials"),
     ])
 )
 
@@ -378,8 +375,8 @@ if __name__ == "__main__":
 
     port = int(os.getenv("PORT", 8000))
     uvicorn.run(
-        "backend.main:app",
-        host="0.0.0.0",  # Важно: 0.0.0.0, а не 127.0.0.1
+        "main:app",
+        host="127.0.0.1",  # Важно: 0.0.0.0, а не 127.0.0.1
         port=port,
         reload=False
     )
