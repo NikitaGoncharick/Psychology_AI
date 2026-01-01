@@ -45,30 +45,29 @@ async def lifespan(app: FastAPI):
     # 3. Подключаемся к облачному Redis ( Создаём Redis и кладём прямо в app.state )
     #redis_url = settings.REDIS_PUBLIC_URL or settings.REDIS_URL
     #redis_url = settings.REDIS_URL
+    redis_url = os.getenv("REDIS_URL")
 
-    # redis_url = os.getenv("REDIS_PUBLIC_URL") or os.getenv("REDIS_URL")
-    #
-    # if not redis_url:
-    #     print("⚠️ ВНИМАНИЕ: Redis URL не найден! Работаем без Redis.")
-    #     app.state.redis = None
-    # else:
-    #     try:
-    #         app.state.redis = Redis.from_url(
-    #             redis_url,
-    #             encoding="utf-8",
-    #             decode_responses=True,
-    #             socket_timeout=5,
-    #             socket_connect_timeout=5,
-    #             retry_on_timeout=True,
-    #             health_check_interval=30
-    #         )
-    #         await app.state.redis.ping() # проверяем коннект сразу
-    #         print("✅ Redis успешно подключен")
-    #     except RedisError as e:
-    #         print(f"⚠️ Не удалось подключиться к Redis: {e}")
-    #         app.state.redis = None
+    if not redis_url:
+        print("⚠️ ВНИМАНИЕ: Redis URL не найден! Работаем без Redis.")
+        app.state.redis = None
+    else:
+        try:
+            app.state.redis = Redis.from_url(
+                redis_url,
+                encoding="utf-8",
+                decode_responses=True,
+                socket_timeout=5,
+                socket_connect_timeout=5,
+                retry_on_timeout=True,
+                health_check_interval=30
+            )
+            await app.state.redis.ping() # проверяем коннект сразу
+            print("✅ Redis успешно подключен")
+        except RedisError as e:
+            print(f"⚠️ Не удалось подключиться к Redis: {e}")
+            app.state.redis = None
 
-    app.state.redis = None  # ← просто None, без попыток
+
     yield #Здесь приложение работает
 
     # Shutdown
@@ -365,7 +364,7 @@ if __name__ == "__main__":
     port = int(os.getenv("PORT", 8000))
     uvicorn.run(
         "main:app", #backend.main:app
-        host="127.0.0.1",  # Важно: 0.0.0.0, а не 127.0.0.1
+        host="0.0.0.0",  # Важно: 0.0.0.0, а не 127.0.0.1
         port=port,
         reload=False
     )

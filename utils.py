@@ -1,5 +1,4 @@
 #Для рещения проблемы с цикличным импортом
-import os
 import jinja2
 import markdown
 from fastapi.templating import Jinja2Templates
@@ -25,28 +24,9 @@ templates.env.filters["markdown"] = lambda text: markdown.markdown(
 #Зависимость для получения Redis клиента
 async def get_redis(request: Request) -> Redis:
     if not hasattr(request.app.state, 'redis') or request.app.state.redis is None:
-        # Здесь уже все Railway references подставлены!
-        redis_url = os.getenv("REDIS_PUBLIC_URL") or os.getenv("REDIS_URL")
-        if not redis_url:
-            raise HTTPException(status_code=503, detail="Redis URL not found (wait for Railway vars)")
+        raise HTTPException(status_code=503, detail="Redis unavailable")
 
-        try:
-            redis = Redis.from_url(
-                redis_url,
-                encoding="utf-8",
-                decode_responses=True,
-                socket_timeout=5,
-                socket_connect_timeout=5,
-                retry_on_timeout=True,
-                health_check_interval=30
-            )
-            await redis.ping()
-            print(f"✅ Redis подключен (лениво): {redis_url}")
-            request.app.state.redis = redis
-        except RedisError as e:
-            raise HTTPException(status_code=503, detail=f"Redis failed: {e}")
-
-    # Проверка живости
+        # Дополнительная проверка живости (опционально, но полезно)
     try:
         await request.app.state.redis.ping()
         return request.app.state.redis
