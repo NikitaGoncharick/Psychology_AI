@@ -41,7 +41,8 @@ async def lifespan(app: FastAPI):
     # 2. Загружаем конфигурацию
 
     # 3. Подключаемся к облачному Redis ( Создаём Redis и кладём прямо в app.state )
-    redis_url = settings.REDIS_PUBLIC_URL or settings.REDIS_URL
+    #redis_url = settings.REDIS_PUBLIC_URL or settings.REDIS_URL
+    redis_url = os.getenv("REDIS_PUBLIC_URL")
 
     if not redis_url:
         print("⚠️ ВНИМАНИЕ: Redis URL не найден! Работаем без Redis.")
