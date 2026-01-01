@@ -28,6 +28,9 @@ from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
+    # ключи для локальной разработки
+    # Для Railway - использовать env vars напрямую
+
     BOT_TOKEN: str = os.getenv("BOT_TOKEN", "")
     GROQ_API_KEY: str = os.getenv("GROQ_API_KEY", "")
     ALGORITHM: str = os.getenv("ALGORITHM", "HS256")
@@ -35,11 +38,9 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "30"))
     STRIPE_SECRET_KEY: str = os.getenv("STRIPE_SECRET_KEY", "")
     STRIPE_WEBHOOK_SECRET: str = os.getenv("STRIPE_WEBHOOK_SECRET", "")
+    REDIS_PUBLIC_URL: str = os.getenv("REDIS_PUBLIC_URL", "")
+    REDIS_URL: str = os.getenv("REDIS_URL", "")
 
-    # Redis URL для Railway
-    #REDIS_URL: str = os.getenv("REDIS_URL", "redis://localhost:6379")
-
-    # Для Railway - использовать env vars напрямую
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"

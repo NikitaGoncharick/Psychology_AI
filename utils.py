@@ -20,6 +20,7 @@ templates.env.filters["markdown"] = lambda text: markdown.markdown(
     extensions=["nl2br", "fenced_code"]
 )
 
+
 #Зависимость для получения Redis клиента
 async def get_redis(request: Request) -> Redis:
     if not hasattr(request.app.state, 'redis') or request.app.state.redis is None:

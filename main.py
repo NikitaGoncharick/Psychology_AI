@@ -1,5 +1,5 @@
 # main.py
-
+import os
 from contextlib import asynccontextmanager
 from redis.asyncio import Redis, RedisError
 import stripe
@@ -11,7 +11,11 @@ from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
 from typing import Optional, Dict
 
-from config import settings
+
+from dotenv import load_dotenv #т.к .env содержит REDIS_PUBLIC_URL=redis://default:...
+load_dotenv()
+from config import settings # ← settings берёт значения уже из os.environ и занет все ключи
+
 from database import engine, get_db
 from models import Base  # Base уже с зарегистрированными моделями
 from crud import UserCRUD, UserCreateSchema, UserLoginSchema, ChatCRUD
@@ -20,6 +24,7 @@ from billing import create_session_checkout, price_IDS, handle_webhook_event
 from utils import templates
 import message_handler
 import profile_handler
+
 
 # Startup
 @asynccontextmanager
@@ -35,49 +40,43 @@ async def lifespan(app: FastAPI):
 
     # 2. Загружаем конфигурацию
 
-    # 3. Подключаемся к Redis ( Создаём Redis и кладём прямо в app.state )
-    # try:
-    #     app.state.redis = Redis.from_url(
-    #         "redis://localhost:6379/0",
-    #         encoding="utf-8",
-    #         decode_responses=True,
-    #         socket_timeout=5,
-    #         socket_connect_timeout=5,
-    #         retry_on_timeout=True,
-    #         health_check_interval=30
-    #     )
-    #     await app.state.redis.ping() # проверяем коннект сразу
-    #     print("✅ Redis успешно подключен")
-    # except RedisError as e:
-    #     print(f"⚠️ Не удалось подключиться к Redis: {e}")
-    #     app.state.redis = None
+    # 3. Подключаемся к облачному Redis ( Создаём Redis и кладём прямо в app.state )
+    redis_url = settings.REDIS_PUBLIC_URL or settings.REDIS_URL
+
+    if not redis_url:
+        print("⚠️ ВНИМАНИЕ: Redis URL не найден! Работаем без Redis.")
+        app.state.redis = None
+    else:
+        try:
+            app.state.redis = Redis.from_url(
+                redis_url,
+                encoding="utf-8",
+                decode_responses=True,
+                socket_timeout=5,
+                socket_connect_timeout=5,
+                retry_on_timeout=True,
+                health_check_interval=30
+            )
+            await app.state.redis.ping() # проверяем коннект сразу
+            print("✅ Redis успешно подключен")
+        except RedisError as e:
+            print(f"⚠️ Не удалось подключиться к Redis: {e}")
+            app.state.redis = None
+
 
     yield #Здесь приложение работает
 
     # Shutdown
     print("🛑 Очистка ресурсов...")
     # 1. Закрываем Redis
-    # if hasattr(app.state, 'redis') and app.state.redis is not None:
-    #     await app.state.redis.close()
-    #     print("Redis соединение закрыто")
+    if hasattr(app.state, 'redis') and app.state.redis is not None:
+        await app.state.redis.close()
+        print("Redis соединение закрыто")
     # 2. Закрываем соединения с БД
 
     print("👋 Приложение остановлено...")
 
 app = FastAPI(lifespan=lifespan)
-
-#Зависимость для получения Redis клиента
-# async def get_redis(request: Request) -> Redis:
-#     if not hasattr(request.app.state, 'redis') or request.app.state.redis is None:
-#         raise HTTPException(status_code=503, detail="Redis unavailable")
-#
-#         # Дополнительная проверка живости (опционально, но полезно)
-#     try:
-#         await request.app.state.redis.ping()
-#         return request.app.state.redis
-#     except RedisError:
-#         raise HTTPException(status_code=503, detail="Redis connection lost")
-
 
 async def auth_check(request: Request) -> Optional[Dict]: # auth_payload может быть либо словарем (dict), либо None
     token = request.cookies.get("access_token")
