@@ -78,8 +78,8 @@ async def create_session_checkout(db: AsyncSession, user, price_id: str):
         payment_method_types=["card"],
         line_items=[{"price": price_id, "quantity": 1}],
         mode='subscription',
-        success_url = "https://smudgily-imposing-zenobia.ngrok-free.dev/payments/success",
-        cancel_url = "https://smudgily-imposing-zenobia.ngrok-free.dev/payments/failed"
+        success_url = "https://psychologyai-production.up.railway.app/payments/success",
+        cancel_url = "https://psychologyai-production.up.railway.app/payments/failed"
     )
     return session.url # ссылка, куда редиректим пользователя
 
