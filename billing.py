@@ -99,30 +99,12 @@ async def handle_webhook_event(event: dict, db: AsyncSession):
         if not user:
             return
 
-        subscription_id = data_object.get("subscription")
-        if not subscription_id:
-            return
+        subscription_id = data_object.get("subscription")  # Может быть None или str
+        period_end_ts = data_object.get("period_end")
+        period_end = datetime.datetime.fromtimestamp(period_end_ts) if period_end_ts else None
+        print(f"Успешный платёж для {user.email} | Subscription ID: {subscription_id} | Period end: {period_end}")
 
-        try:
-            subscription = stripe.Subscription.retrieve(subscription_id)
-            status = subscription.status
-            period_end_ts = subscription.current_period_end
-            period_end = datetime.datetime.fromtimestamp(period_end_ts) if period_end_ts else None
-
-            print(f"Успешный платёж для {user.email} | "
-                  f"Subscription ID: {subscription_id} | "
-                  f"Status: {status} | Period end: {period_end}")
-
-            await UserCRUD.update_subscription(
-                db, user,
-                subscription_id=subscription_id,
-                status=status,
-                period_end=period_end
-            )
-        except stripe.error.StripeError as e:
-            print(f"Stripe error при получении подписки: {e}")
-            # Вариант: fallback на старое поведение
-            # await UserCRUD.update_subscription(db, user, subscription_id, "active", None)
+        await UserCRUD.update_subscription(db, user, subscription_id = subscription_id, status="active", period_end = period_end)
 
     # 2. Неудачная попытка оплаты счёта
     elif event_type == "invoice.payment_failed":
@@ -162,7 +144,7 @@ async def handle_webhook_event(event: dict, db: AsyncSession):
         status = data_object["status"] # обычно "trialing" или "active"
         period_end_ts = data_object.get("current_period_end")
         period_end = datetime.datetime.fromtimestamp(period_end_ts) if period_end_ts else None
-        print(f"Подписка создана для {user.email} | Status: {status}")
+        print(f"Подписка СОЗДАНА для {user.email} | Status: {status} | period_end_ts: {period_end_ts} |period_end: {period_end}")
 
         await UserCRUD.update_subscription(db, user, subscription_id = subscription_id, status = status, period_end = period_end)
 
@@ -178,7 +160,7 @@ async def handle_webhook_event(event: dict, db: AsyncSession):
         status = data_object["status"]
         period_end_ts = data_object.get("current_period_end")
         period_end = datetime.datetime.fromtimestamp(period_end_ts) if period_end_ts else None
-        print(f"Подписка обновлена для {user.email} | Новый статус: {status}")
+        print(f"Подписка ОБНОВЛЕНА для {user.email} | Новый статус: {status} | period_end_ts: {period_end_ts} |period_end: {period_end}")
 
         await UserCRUD.update_subscription(db, user, subscription_id = subscription_id, status = status, period_end = period_end)
 

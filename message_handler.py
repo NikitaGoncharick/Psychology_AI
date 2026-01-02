@@ -109,6 +109,7 @@ async def user_conversation(request, db, chat_id, text, auth_payload):
                         </script>
                     """)
 
+    print("Отправка неразрешена, подписка неактивна")
     return await process_message(db, conversation_id_to_use, text, request)
 
 

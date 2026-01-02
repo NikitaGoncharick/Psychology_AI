@@ -96,6 +96,7 @@ class UserCRUD:
         if subscription_id is not None:
             user.stripe_subscription_id = subscription_id
         user.subscription_status = status
+        print(f"subscription_status = {user.subscription_status}")
         user.subscription_current_period_end = period_end
         await db.commit()
         await db.refresh(user)
