@@ -10,9 +10,9 @@ stripe.api_key = settings.STRIPE_SECRET_KEY
 
 # Список тарифов (создаются один раз в Stripe Dashboard)
 price_IDS = {
-    "pro_Weekly": "price_1Sh7tJ060rnebdaLr2Gn7Dxj",
-    "pro_Monthly": "price_1Sh7Qf060rnebdaL9coJ2X4v",
-    "pro_Annual": "price_1Sh7vU060rnebdaLhbbA3ZGg"
+    "pro_Weekly": "price_1SlCpP060rnebdaLFdX6oyOS",
+    "pro_Monthly": "price_1SlCpy060rnebdaLE0uYBaub",
+    "pro_Annual": "price_1SlCoD060rnebdaLo510sftI"
 }
 
 
