@@ -40,7 +40,7 @@ async def lifespan(app: FastAPI):
 
     # 3. Подключаемся к облачному Redis ( Создаём Redis и кладём прямо в app.state )
     #redis_url = settings.REDIS_URL or settings.REDIS_PUBLIC_URL
-    redis_url = os.getenv("REDIS_PUBLIC_URL")
+    redis_url = os.getenv("REDIS_URL")
 
     if not redis_url:
         print("⚠️ ВНИМАНИЕ: Redis URL не найден! Работаем без Redis.")
@@ -359,8 +359,8 @@ if __name__ == "__main__":
     port = int(os.getenv("PORT", 8000))
     uvicorn.run(
         "main:app", #backend.main:app
-        #host="0.0.0.0", # Важно: 0.0.0.0, а не 127.0.0.1
-        host="127.0.0.1",
+        host="0.0.0.0", # Важно: 0.0.0.0, а не 127.0.0.1
+        #host="127.0.0.1",
         port=port,
         reload=False
     )
