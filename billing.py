@@ -90,57 +90,59 @@ async def handle_webhook_event(event: dict, db: AsyncSession):
     data_object = event["data"]["object"]
     print(f"Получено событие Stripe: {event_type}")
 
-    # 1. Успешная оплата счёта (invoice paid / payment succeeded)
+    customer_id = data_object.get("customer")
+    if not customer_id:
+        return
+
+    user = await UserCRUD.get_by_stripe_customer_id(db, customer_id)
+    if not user:
+        return
+
+    subscription_id = None
+
+    # Получаем subscription_id разными способами в зависимости от типа события
+    if "subscription" in data_object:
+        subscription_id = data_object["subscription"]
+    elif event_type.startswith("customer.subscription"):
+        subscription_id = data_object.get("id")
+
+    # ──────────────────────────────────────────────────────────────
+    # 1. Успешная оплата (самый важный кейс для первой оплаты)
     if event_type in ["invoice.paid", "invoice.payment_succeeded"]:
-        customer_id = data_object.get("customer")
-        if not customer_id:
-            return
-
-        # Получаем subscription_id из инвойса
-        subscription_id = data_object.get("subscription")
         if not subscription_id:
+            print("В invoice нет subscription_id — пропускаем")
             return
 
-        user = await UserCRUD.get_by_stripe_customer_id(db, customer_id)
-        if not user:
-            return
-
-        # Для получения актуальной даты окончания периода нужно загрузить подписку
         try:
-            subscription = stripe.Subscription.retrieve(subscription_id)
-            period_end_ts = subscription.get("current_period_end")
+            sub = stripe.Subscription.retrieve(subscription_id)
+
+            status = sub.status
+            period_end_ts = sub.current_period_end
             period_end = datetime.datetime.fromtimestamp(period_end_ts) if period_end_ts else None
 
-            print(f"Успешный платёж для {user.email} | Subscription ID: {subscription_id} | Period end: {period_end}")
+            print(f"Успешный платёж для {user.email} | "
+                  f"Subscription ID: {subscription_id} | "
+                  f"Status: {status} | Period end: {period_end}")
 
             await UserCRUD.update_subscription(
                 db, user,
                 subscription_id=subscription_id,
-                status="active",
+                status=status,  # ← важно! берём реальный статус
                 period_end=period_end
             )
         except stripe.error.StripeError as e:
-            print(f"Ошибка при получении подписки: {e}")
+            print(f"Ошибка при получении подписки {subscription_id}: {e}")
 
-    # 2. Неудачная попытка оплаты счёта
+    # ──────────────────────────────────────────────────────────────
+    # 2. Неудачная попытка оплаты
     elif event_type == "invoice.payment_failed":
-        customer_id = data_object.get("customer")
-        if not customer_id:
-            return
-
-        subscription_id = data_object.get("subscription")
         if not subscription_id:
             return
 
-        user = await UserCRUD.get_by_stripe_customer_id(db, customer_id)
-        if not user:
-            return
-
-        # Получаем актуальный статус подписки
         try:
-            subscription = stripe.Subscription.retrieve(subscription_id)
-            status = subscription.get("status", "past_due")
-            period_end_ts = subscription.get("current_period_end")
+            sub = stripe.Subscription.retrieve(subscription_id)
+            status = sub.status or "past_due"
+            period_end_ts = sub.current_period_end
             period_end = datetime.datetime.fromtimestamp(period_end_ts) if period_end_ts else None
 
             print(f"Неудачный платёж для {user.email} | Subscription ID: {subscription_id}")
@@ -154,18 +156,10 @@ async def handle_webhook_event(event: dict, db: AsyncSession):
         except stripe.error.StripeError as e:
             print(f"Ошибка при получении подписки: {e}")
 
-    # 3. Подписка отменена (пользователь отменил или истёк срок)
+    # ──────────────────────────────────────────────────────────────
+    # 3. Подписка отменена
     elif event_type == "customer.subscription.deleted":
-        customer_id = data_object.get("customer")
-        if not customer_id:
-            return
-
-        user = await UserCRUD.get_by_stripe_customer_id(db, customer_id)
-        if not user:
-            return
-
         print(f"Подписка отменена для {user.email}")
-
         await UserCRUD.update_subscription(
             db, user,
             subscription_id=None,
@@ -173,18 +167,13 @@ async def handle_webhook_event(event: dict, db: AsyncSession):
             period_end=None
         )
 
-    # 4. Подписка создана (полезно для триала)
+    # ──────────────────────────────────────────────────────────────
+    # 4. Подписка создана (очень полезно для триала)
     elif event_type == "customer.subscription.created":
-        customer_id = data_object.get("customer")
-        if not customer_id:
+        if not subscription_id:
             return
 
-        user = await UserCRUD.get_by_stripe_customer_id(db, customer_id)
-        if not user:
-            return
-
-        subscription_id = data_object["id"]
-        status = data_object.get("status", "active")  # обычно "trialing" или "active"
+        status = data_object.get("status", "incomplete")
         period_end_ts = data_object.get("current_period_end")
         period_end = datetime.datetime.fromtimestamp(period_end_ts) if period_end_ts else None
 
@@ -197,18 +186,13 @@ async def handle_webhook_event(event: dict, db: AsyncSession):
             period_end=period_end
         )
 
+    # ──────────────────────────────────────────────────────────────
     # 5. Подписка обновлена
     elif event_type == "customer.subscription.updated":
-        customer_id = data_object.get("customer")
-        if not customer_id:
+        if not subscription_id:
             return
 
-        user = await UserCRUD.get_by_stripe_customer_id(db, customer_id)
-        if not user:
-            return
-
-        subscription_id = data_object["id"]
-        status = data_object.get("status", "active")
+        status = data_object.get("status")
         period_end_ts = data_object.get("current_period_end")
         period_end = datetime.datetime.fromtimestamp(period_end_ts) if period_end_ts else None
 
