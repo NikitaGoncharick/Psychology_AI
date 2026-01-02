@@ -104,10 +104,12 @@ class UserCRUD:
     @staticmethod
     async def is_subscription_active(db, user: User) -> bool:
         if user.subscription_status != "active":
+            print("Подписка Неактивна")
             return False
 
         # Проверяем, не истёк ли период
         if user.subscription_current_period_end is None:
+            print("Подписка Истекла")
             return False
 
         if datetime.datetime.utcnow() > user.subscription_current_period_end:
