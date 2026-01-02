@@ -108,18 +108,18 @@ class UserCRUD:
             print("Подписка Неактивна")
             return False
 
-        # Проверяем, не истёк ли период
-        if user.subscription_current_period_end is None:
-            print("Подписка Истекла")
-            return False
-
-        if datetime.datetime.utcnow() > user.subscription_current_period_end:
-            # Подписка истекла — обновляем статус для будущего
-            user.subscription_status = "inactive"
-            user.subscription_current_period_end = None
-            await db.commit()
-            await db.refresh(user)
-            return False
+        # # Проверяем, не истёк ли период
+        # if user.subscription_current_period_end is None:
+        #     print("Подписка Истекла")
+        #     return False
+        #
+        # if datetime.datetime.utcnow() > user.subscription_current_period_end:
+        #     # Подписка истекла — обновляем статус для будущего
+        #     user.subscription_status = "inactive"
+        #     user.subscription_current_period_end = None
+        #     await db.commit()
+        #     await db.refresh(user)
+        #     return False
 
         return True
 
