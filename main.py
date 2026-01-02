@@ -329,7 +329,7 @@ async def rename_conversation(conversation_id: int = Form(...), new_name: str = 
 @app.post("/create-checkout-session")
 async def create_checkout(request: Request,db: AsyncSession = Depends(get_db), auth_payload: Optional[Dict] = Depends(auth_check), plan_type: str = Form("plan_type"), ):
     if not auth_payload:
-        return None
+        return RedirectResponse(url="/login", status_code=303)
 
     user = await UserCRUD.get_user_by_email(db, auth_payload["sub"])
     price_id = price_IDS.get(plan_type)
