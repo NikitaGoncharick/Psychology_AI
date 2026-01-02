@@ -87,7 +87,9 @@ async def create_session_checkout(db: AsyncSession, user, price_id: str):
 async def handle_webhook_event(event: dict, db: AsyncSession):
     #Обрабатывает входящие webhook-события от Stripe | Синхронизирует статус подписки пользователя в базе данных.
     event_type = event["type"]
+    print(f"event_type: {event_type}")
     data_object = event["data"]["object"]
+    print(f"data_object: {data_object}")
     print(f"Получено событие Stripe: {event_type}")
 
     # 1. Успешная оплата счёта (invoice paid / payment succeeded)
@@ -95,16 +97,44 @@ async def handle_webhook_event(event: dict, db: AsyncSession):
         customer_id = data_object.get("customer")
         if not customer_id:
             return
+
         user = await UserCRUD.get_by_stripe_customer_id(db, customer_id)
         if not user:
             return
 
-        subscription_id = data_object.get("subscription")  # Может быть None или str
-        period_end_ts = data_object.get("period_end")
-        period_end = datetime.datetime.fromtimestamp(period_end_ts) if period_end_ts else None
-        print(f"Успешный платёж для {user.email} | Subscription ID: {subscription_id} | Period end: {period_end}")
+        subscription_id = data_object.get("subscription")
+        if not subscription_id:
+            print("В invoice.paid нет subscription_id — пропускаем")
+            return
 
-        await UserCRUD.update_subscription(db, user, subscription_id = subscription_id, status="active", period_end = period_end)
+        try:
+            # Это самое главное изменение — запрашиваем актуальную подписку
+            subscription = stripe.Subscription.retrieve(subscription_id)
+
+            # Берём правильные значения
+            period_end_ts = subscription.current_period_end
+            period_end = datetime.datetime.fromtimestamp(period_end_ts) if period_end_ts else None
+            status = subscription.status  # на всякий случай берём реальный статус
+
+            print(f"Успешный платёж → {user.email} | "
+                  f"Subscription ID: {subscription_id} | "
+                  f"Status: {status} | "
+                  f"Period end (правильный): {period_end} ({period_end_ts})")
+
+            await UserCRUD.update_subscription(
+                db, user,
+                subscription_id=subscription_id,
+                status=status,  # ← не хардкодим "active"
+                period_end=period_end  # ← это +7 дней, +1 месяц или +1 год
+            )
+
+        except stripe.error.StripeError as e:
+            print(f"Ошибка Stripe в invoice.paid: {e}")
+            # Если хочешь fallback — можно оставить старое поведение
+            # period_end = datetime.datetime.fromtimestamp(data_object.get("period_end")) if data_object.get("period_end") else None
+            # await UserCRUD.update_subscription(db, user, subscription_id, "active", period_end)
+        except Exception as e:
+            print(f"Неизвестная ошибка в invoice.paid: {type(e).__name__}: {e}")
 
     # 2. Неудачная попытка оплаты счёта
     elif event_type == "invoice.payment_failed":
