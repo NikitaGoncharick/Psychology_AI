@@ -52,11 +52,8 @@ RUN pip install --no-cache-dir --upgrade pip && \
 # Копируем весь бэкенд-код
 COPY backend/ .
 
-# Копируем папку с шаблонами и статикой
-COPY frontend/ ./frontend/
-
-# (опционально) Если у вас есть статика/шаблоны в frontend, копируем их тоже
-# COPY frontend/ ./frontend/
+# Копируем содержимое frontend напрямую в /app
+COPY frontend/ .
 
 # Создаём non-root пользователя (хорошая практика безопасности)
 RUN useradd -m -u 1000 appuser && chown -R appuser:appuser /app
