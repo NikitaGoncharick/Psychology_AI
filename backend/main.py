@@ -8,7 +8,6 @@ from fastapi import FastAPI, Request, Form, Depends, HTTPException
 
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi.responses import RedirectResponse
-from fastapi.templating import Jinja2Templates
 from typing import Optional, Dict
 
 
@@ -359,7 +358,7 @@ if __name__ == "__main__":
 
     port = int(os.getenv("PORT", 8000))
     uvicorn.run(
-        "main:app", #backend.main:app
+        "backend.main:app", #backend.main:app
         host="0.0.0.0", # Важно: 0.0.0.0, а не 127.0.0.1
         #host="127.0.0.1",
         port=port,

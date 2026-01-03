@@ -9,8 +9,8 @@ from redis.asyncio import Redis
 templates = Jinja2Templates(
     directory="../frontend",
     loader=jinja2.ChoiceLoader([
-        jinja2.FileSystemLoader("frontend"),
-        jinja2.FileSystemLoader("frontend/partials"),
+        jinja2.FileSystemLoader("../frontend"),
+        jinja2.FileSystemLoader("../frontend/partials"),
     ])
 )
 
