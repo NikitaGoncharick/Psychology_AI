@@ -32,35 +32,32 @@
 # Используем лёгкий образ Python
 FROM python:3.11-slim
 
-# Устанавливаем рабочую директорию
 WORKDIR /app
 
-# Устанавливаем системные зависимости (нужны для psycopg2 и т.п.)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
     libpq-dev \
     postgresql-client \
     && rm -rf /var/lib/apt/lists/*
 
-# Копируем только requirements сначала — для лучшего кэширования слоёв
+# Копируем requirements из backend
 COPY backend/requirements.txt .
 
-# Обновляем pip и ставим зависимости
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 
-# Копируем весь бэкенд-код
+# Копируем весь backend-код в корень /app
 COPY backend/ .
 
-# Копируем содержимое frontend напрямую в /app
+# Копируем содержимое frontend (шаблоны + partials + всё остальное) тоже прямо в /app
+# Это создаст /app/home_page.html, /app/partials/... и т.д.
 COPY frontend/ .
 
-# Создаём non-root пользователя (хорошая практика безопасности)
+# Безопасность (опционально, но полезно)
 RUN useradd -m -u 1000 appuser && chown -R appuser:appuser /app
 USER appuser
 
-# Порт (Railway сам задаёт переменную PORT)
 EXPOSE 8000
 
-# Запуск (самый надёжный вариант для Railway)
-CMD uvicorn main:app --host 0.0.0.0 --port ${PORT:-8000}
+# Railway использует переменную PORT, поэтому так надёжнее
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "${PORT:-8000}"]
