@@ -1,4 +1,5 @@
 #Для рещения проблемы с цикличным импортом
+import os
 import jinja2
 import markdown
 from fastapi.templating import Jinja2Templates
@@ -6,13 +7,24 @@ from fastapi import Request, HTTPException
 from redis.asyncio import Redis, RedisError
 from redis.asyncio import Redis
 
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+FRONTEND_DIR = os.path.join(BASE_DIR, "frontend")
+
+# templates = Jinja2Templates(
+#     directory="../frontend",
+#     loader=jinja2.ChoiceLoader([
+#         jinja2.FileSystemLoader("../frontend"),
+#         jinja2.FileSystemLoader("../frontend/partials"),
+#     ])
+# )
 templates = Jinja2Templates(
-    directory="../frontend",
+    directory=FRONTEND_DIR,
     loader=jinja2.ChoiceLoader([
-        jinja2.FileSystemLoader("../frontend"),
-        jinja2.FileSystemLoader("../frontend/partials"),
+        jinja2.FileSystemLoader(FRONTEND_DIR),
+        jinja2.FileSystemLoader(os.path.join(FRONTEND_DIR, "partials")),
     ])
 )
+
 
 # Регистрация фильтра Markdown для красивого рендеринга ответов ИИ
 templates.env.filters["markdown"] = lambda text: markdown.markdown(

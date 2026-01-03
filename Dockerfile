@@ -32,32 +32,48 @@
 # Используем лёгкий образ Python
 FROM python:3.11-slim
 
-WORKDIR /app
-
+# =========================
+# Системные зависимости
+# =========================
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
     libpq-dev \
     postgresql-client \
     && rm -rf /var/lib/apt/lists/*
 
-# Копируем requirements из backend
-COPY backend/requirements.txt .
+# =========================
+# Рабочая директория
+# =========================
+WORKDIR /app
+
+# =========================
+# Python зависимости
+# =========================
+COPY backend/requirements.txt ./backend/requirements.txt
 
 RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir -r requirements.txt
+    pip install --no-cache-dir -r backend/requirements.txt
 
-# Копируем весь backend-код в корень /app
-COPY backend/ .
+# =========================
+# Код приложения
+# =========================
+COPY backend ./backend
+COPY frontend ./frontend
 
-# Копируем содержимое frontend (шаблоны + partials + всё остальное) тоже прямо в /app
-# Это создаст /app/home_page.html, /app/partials/... и т.д.
-COPY frontend/ .
+# =========================
+# PYTHONPATH
+# =========================
+ENV PYTHONPATH=/app/backend
 
-# Безопасность (опционально, но полезно)
-RUN useradd -m -u 1000 appuser && chown -R appuser:appuser /app
+# =========================
+# Безопасность
+# =========================
+RUN useradd -m appuser && chown -R appuser:appuser /app
 USER appuser
 
+# =========================
+# Запуск
+# =========================
 EXPOSE 8000
 
-# Railway использует переменную PORT, поэтому так надёжнее
 CMD ["uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "${PORT:-8000}"]
