@@ -85,78 +85,86 @@ async def create_session_checkout(db: AsyncSession, user, price_id: str):
 
 #Обрабатываем события от Stripe (самое важное!)
 async def handle_webhook_event(event: dict, db: AsyncSession):
-    event_type = event.get("type", "unknown")
+    #Обрабатывает входящие webhook-события от Stripe | Синхронизирует статус подписки пользователя в базе данных.
+    event_type = event["type"]
+    print(f"event_type: {event_type}")
+    data_object = event["data"]["object"]
+    print(f"data_object: {data_object}")
     print(f"Получено событие Stripe: {event_type}")
 
-    # Безопасно достаём data_object
-    data = event.get("data", {})
-    data_object = data.get("object", {})
-
-    # Общие проверки
-    customer_id = data_object.get("customer")
-    if not customer_id:
-        print("Нет customer_id")
-        return
-
-    user = await UserCRUD.get_by_stripe_customer_id(db, customer_id)
-    if not user:
-        print("Пользователь не найден")
-        return
-
-    # 1. Успешная оплата — самый простой вариант
+    # 1. Успешная оплата счёта (invoice paid / payment succeeded)
     if event_type in ["invoice.paid", "invoice.payment_succeeded"]:
+        customer_id = data_object.get("customer")
+        if not customer_id:
+            return
+        user = await UserCRUD.get_by_stripe_customer_id(db, customer_id)
+        if not user:
+            return
+
+        subscription_id = data_object.get("subscription")  # Может быть None или str
+        period_end_ts = data_object.get("period_end")
+        period_end = datetime.datetime.fromtimestamp(period_end_ts) if period_end_ts else None
+        print(f"Успешный платёж для {user.email} | Subscription ID: {subscription_id} | Period end: {period_end}")
+
+        await UserCRUD.update_subscription(db, user, subscription_id = subscription_id, status="active", period_end = period_end)
+
+    # 2. Неудачная попытка оплаты счёта
+    elif event_type == "invoice.payment_failed":
+        customer_id = data_object.get("customer")
+        if not customer_id:
+            return
+        user = await UserCRUD.get_by_stripe_customer_id(db, customer_id)
+        if not user:
+            return
         subscription_id = data_object.get("subscription")
-        if subscription_id:
-            # Пытаемся взять период из подписки, но если не получится — берём из инвойса
-            try:
-                sub = stripe.Subscription.retrieve(subscription_id)
-                period_end_ts = sub.current_period_end
-                period_end = datetime.datetime.fromtimestamp(period_end_ts) if period_end_ts else None
-                status = sub.status
-            except Exception as e:
-                print(f"Не удалось взять подписку: {e}")
-                # fallback — старое поведение (то, что сейчас хоть что-то записывает)
-                period_end_ts = data_object.get("period_end")
-                period_end = datetime.datetime.fromtimestamp(period_end_ts) if period_end_ts else None
-                status = "active"
+        print(f"Неудачный платёж для {user.email} | Subscription ID: {subscription_id}")
 
-            print(f"Оплата прошла → {user.email} | period_end: {period_end}")
+        await UserCRUD.update_subscription(db, user, subscription_id = subscription_id, status="past_due", period_end = None)
 
-            await UserCRUD.update_subscription(
-                db, user,
-                subscription_id=subscription_id,
-                status=status,
-                period_end=period_end
-            )
-
-    # 2. Подписка создана — упрощённо
-    elif event_type == "customer.subscription.created":
-        subscription_id = data_object.get("id")
-        if subscription_id:
-            status = data_object.get("status", "unknown")
-            period_end_ts = data_object.get("current_period_end")
-            period_end = datetime.datetime.fromtimestamp(period_end_ts) if period_end_ts else None
-
-            print(f"Создана подписка → {user.email} | period_end: {period_end}")
-
-            await UserCRUD.update_subscription(
-                db, user,
-                subscription_id=subscription_id,
-                status=status,
-                period_end=period_end
-            )
-
-    # 3. Обновлена / удалена — минимально
-    elif event_type == "customer.subscription.updated":
-        subscription_id = data_object.get("id")
-        if subscription_id:
-            status = data_object.get("status", "unknown")
-            period_end_ts = data_object.get("current_period_end")
-            period_end = datetime.datetime.fromtimestamp(period_end_ts) if period_end_ts else None
-            await UserCRUD.update_subscription(db, user, subscription_id, status, period_end)
-
+    # 3. Подписка отменена (пользователь отменил или истёк срок)
     elif event_type == "customer.subscription.deleted":
-        await UserCRUD.update_subscription(db, user, None, "canceled", None)
+        customer_id = data_object.get("customer")
+        if not customer_id:
+            return
+        user = await UserCRUD.get_by_stripe_customer_id(db, customer_id)
+        if not user:
+            return
+        print(f"Подписка отменена для {user.email}")
+
+        await UserCRUD.update_subscription(db, user, subscription_id=None, status="canceled", period_end = None)
+
+    # 4. Подписка создана (полезно для триала)
+    elif event_type == "customer.subscription.created":
+        customer_id = data_object.get("customer")
+        if not customer_id:
+            return
+        user = await UserCRUD.get_by_stripe_customer_id(db, customer_id)
+        if not user:
+            return
+
+        subscription_id = data_object["id"]
+        status = data_object["status"] # обычно "trialing" или "active"
+        period_end_ts = data_object.get("current_period_end")
+        period_end = datetime.datetime.fromtimestamp(period_end_ts) if period_end_ts else None
+        print(f"Подписка СОЗДАНА для {user.email} | Status: {status} | period_end_ts: {period_end_ts} |period_end: {period_end}")
+
+        await UserCRUD.update_subscription(db, user, subscription_id = subscription_id, status = status, period_end = period_end)
+
+    # 5. Подписка обновлена
+    elif event_type == "customer.subscription.updated":
+        customer_id = data_object.get("customer")
+        if not customer_id:
+            return
+        user = await UserCRUD.get_by_stripe_customer_id(db, customer_id)
+        if not user:
+            return
+        subscription_id = data_object["id"]
+        status = data_object["status"]
+        period_end_ts = data_object.get("current_period_end")
+        period_end = datetime.datetime.fromtimestamp(period_end_ts) if period_end_ts else None
+        print(f"Подписка ОБНОВЛЕНА для {user.email} | Новый статус: {status} | period_end_ts: {period_end_ts} |period_end: {period_end}")
+
+        await UserCRUD.update_subscription(db, user, subscription_id = subscription_id, status = status, period_end = period_end)
 
     else:
-        print(f"Необрабатываемое: {event_type}")
+        print(f"Необрабатываемое событие: {event_type}")

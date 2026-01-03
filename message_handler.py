@@ -48,13 +48,13 @@ async def free_conversation(request: Request, text: str):
                                 </script>  """)
     # === ФИЛЬТР ===
     if not await is_psychology_related(text):
-        reply = "Sorry, I specialize only in topics related to psychology..."
+        reply = "Sorry, I specialize only in topics related to psychology, emotions, relationships, and personal growth. 😊 Tell me what's bothering or worrying you — I'm here to support you."
     else:
         reply = await groq_ai_answer(text)
 
     # Увеличиваем счётчик и ставим TTL = 5 минут | Если в течение таймера пользователь не пишет → ключ автоматически удаляется Redis-ом
     await redis.incr(redis_key) # Атомарно увеличиваем значение счётчика на 1 (если ключа не существовало → создастся со значением 1)
-    await redis.expire(redis_key, 60) # Устанавливаем ключ на 300 секунд
+    await redis.expire(redis_key, 120) # Устанавливаем ключ на 300 секунд
 
     response = templates.TemplateResponse(
         "message.html",
@@ -109,7 +109,6 @@ async def user_conversation(request, db, chat_id, text, auth_payload):
                         </script>
                     """)
 
-    print("Отправка неразрешена, подписка неактивна")
     return await process_message(db, conversation_id_to_use, text, request)
 
 
