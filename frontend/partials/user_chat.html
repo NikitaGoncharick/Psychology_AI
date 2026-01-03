@@ -447,7 +447,14 @@
     </div>
   </div>
 </div>
-
+<script>
+document.body.addEventListener('htmx:afterRequest', function(evt) {
+  if (evt.detail.successful) {
+    const input = document.querySelector('.input-message');
+    if (input) input.value = '';
+  }
+});
+</script>
 <script>
     // Глобальные переменные — ОДНИ на весь скрипт
     let currentAction = null;  // 'rename' или 'delete'
