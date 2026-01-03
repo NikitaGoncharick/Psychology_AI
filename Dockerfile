@@ -52,6 +52,9 @@ RUN pip install --no-cache-dir --upgrade pip && \
 # Копируем весь бэкенд-код
 COPY backend/ .
 
+# Копируем папку с шаблонами и статикой
+COPY frontend/ ./frontend/
+
 # (опционально) Если у вас есть статика/шаблоны в frontend, копируем их тоже
 # COPY frontend/ ./frontend/
 
