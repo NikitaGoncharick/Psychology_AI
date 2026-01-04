@@ -5,7 +5,6 @@ import markdown
 from fastapi.templating import Jinja2Templates
 from fastapi import Request, HTTPException
 from redis.asyncio import Redis, RedisError
-from redis.asyncio import Redis
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 FRONTEND_DIR = os.path.join(BASE_DIR, "frontend")

@@ -5,14 +5,11 @@ from redis.asyncio import Redis, RedisError
 import stripe
 from fastapi import FastAPI, Request, Form, Depends, HTTPException
 
-
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi.responses import RedirectResponse
 from typing import Optional, Dict
 
-
-from dotenv import load_dotenv #т.к .env содержит REDIS_PUBLIC_URL=redis://default:...
-load_dotenv()
+from dotenv import load_dotenv
 from config import settings # ← settings берёт значения уже из os.environ и занет все ключи
 
 from database import engine, get_db
@@ -24,6 +21,7 @@ from utils import templates
 import message_handler
 import profile_handler
 
+load_dotenv()
 
 # Startup
 @asynccontextmanager
@@ -37,8 +35,7 @@ async def lifespan(app: FastAPI):
 
     # 2. Загружаем конфигурацию
 
-    # 3. Подключаемся к облачному Redis ( Создаём Redis и кладём прямо в app.state )
-    #redis_url = settings.REDIS_URL or settings.REDIS_PUBLIC_URL
+    # 3. Подключаемся к облачному Redis
     redis_url = os.getenv("REDIS_URL")
 
     if not redis_url:
