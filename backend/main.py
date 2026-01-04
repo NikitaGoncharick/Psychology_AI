@@ -42,7 +42,7 @@ async def lifespan(app: FastAPI):
     redis_url = os.getenv("REDIS_URL")
 
     if not redis_url:
-        print("⚠️ ВНИМАНИЕ: Redis URL не найден! Работаем без Redis.")
+        print("⚠️ ВНИМАНИЕ: Redis URL не найден! Инициализация без Redis.")
         app.state.redis = None
     else:
         try:

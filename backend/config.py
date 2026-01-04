@@ -41,6 +41,7 @@ class Settings(BaseSettings):
     REDIS_PUBLIC_URL: str = os.getenv("REDIS_PUBLIC_URL", "")
     REDIS_URL: str = os.getenv("REDIS_URL", "")
     SQLALCHEMY_DATABASE_URL: str = os.getenv("SQLALCHEMY_DATABASE_URL", "")
+    LOCAL_SQLALCHEMY_DATABASE_URL: str = os.getenv("LOCAL_SQLALCHEMY_DATABASE_URL", "")
 
     class Config:
         env_file = ".env"
