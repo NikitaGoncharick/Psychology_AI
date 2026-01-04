@@ -40,6 +40,7 @@ class Settings(BaseSettings):
     STRIPE_WEBHOOK_SECRET: str = os.getenv("STRIPE_WEBHOOK_SECRET", "")
     REDIS_PUBLIC_URL: str = os.getenv("REDIS_PUBLIC_URL", "")
     REDIS_URL: str = os.getenv("REDIS_URL", "")
+    SQLALCHEMY_DATABASE_URL: str = os.getenv("SQLALCHEMY_DATABASE_URL", "")
 
     class Config:
         env_file = ".env"
