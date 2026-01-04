@@ -4,7 +4,7 @@ from sqlalchemy.orm import DeclarativeBase
 import os
 
 # 🔗 Подключение к PostgreSQL
-#SQLALCHEMY_DATABASE_URL = "postgresql+asyncpg://postgres:1@localhost:5432/Psychology_AI_Database" #говорит SQLAlchemy использовать асинхронный драйвер
+#SQLALCHEMY_DATABASE_URL = "postgresql+asyncpg://postgres:1@localhost:5432/Psychology_AI_Database" #Локальная БД
 SQLALCHEMY_DATABASE_URL = "postgresql+asyncpg://postgres:mXVKhLpgkbyopQrknBRxocadYrlfHhvP@postgres.railway.internal:5432/railway"
 #SQLALCHEMY_DATABASE_URL = "postgresql+asyncpg://postgres:mXVKhLpgkbyopQrknBRxocadYrlfHhvP@crossover.proxy.rlwy.net:36009/railway"
 
