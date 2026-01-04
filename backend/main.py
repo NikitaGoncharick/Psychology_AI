@@ -158,7 +158,7 @@ async def login_user(request: Request, db: AsyncSession = Depends(get_db), email
     # 1. Пытаемся авторизоваться
     user = await UserCRUD.login_user(db, UserLoginSchema(email=email, password=password))
     if not user:
-        return templates.TemplateResponse("login_page.html", {"request": request, "error_message": "Неверный email или пароль"})
+        return templates.TemplateResponse("login_page.html", {"request": request, "error_message": "Invalid email or password"})
     return await create_token(user_email=user.email)
 
 @app.get("/register")
