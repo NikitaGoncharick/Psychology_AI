@@ -144,7 +144,7 @@ async def show_pricing_page(request: Request, auth_payload: Optional[Dict] = Dep
 
 @app.post("/guest/send")
 async def guest_send(request: Request, text: str = Form(...)):
-    return await message_handler.free_conversation(request, text) #прерываем выполнение через return
+    return await message_handler.free_conversation(request, text)
 @app.post("/send")
 async def send (request: Request, db: AsyncSession = Depends(get_db), text: str = Form(...), chat_id: int = Form(...), auth_payload: Optional[Dict] = Depends(auth_check)):
     print("Отправка сообщения")

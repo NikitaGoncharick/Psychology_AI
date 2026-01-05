@@ -3,8 +3,6 @@ import billing
 async def get_profile_data(request, db, user_data):
     user_email = user_data.email
     subscription_status = user_data.subscription_status
-    # if subscription_status == "active":
-    #     period_end = user_data.subscription_current_period_end
 
     return {
         "user_email": user_email,
@@ -14,6 +12,3 @@ async def get_profile_data(request, db, user_data):
         if user_data.subscription_current_period_end
         else None)
     }
-
-
-    print(f"user_email: {user_email}, subscription_status: {subscription_status}")

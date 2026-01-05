@@ -9,7 +9,6 @@ import os
 # 🔗 Подключение к PostgreSQL
 #LOCAL_SQLALCHEMY_DATABASE_URL = os.getenv("LOCAL_SQLALCHEMY_DATABASE_URL")
 SQLALCHEMY_DATABASE_URL = os.getenv("SQLALCHEMY_DATABASE_URL")
-#SQLALCHEMY_DATABASE_URL = "postgresql+asyncpg://postgres:mXVKhLpgkbyopQrknBRxocadYrlfHhvP@crossover.proxy.rlwy.net:36009/railway"
 
 # 🚀 Создаём асинхронный движок
 engine =create_async_engine(
