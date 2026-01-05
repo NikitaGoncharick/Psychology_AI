@@ -176,9 +176,12 @@
  .sidebar {
   display: none !important;
 }
- .chat-main, .container {
-  max-width: 100% !important;
-  width: 100% !important;
+.container {
+  max-width: 1320px !important;   /* стандартный Bootstrap xl, можно 1280px или 1400px под твой дизайн */
+  margin: 0 auto !important;      /* центрирование */
+  padding-left: 20px !important;  /* небольшие боковые отступы, чтобы не прилипало к краям */
+  padding-right: 20px !important;
+  width: 100% !important;         /* остаётся отзывчивым до max-width */
 }
 </style>
 
