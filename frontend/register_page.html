@@ -57,6 +57,12 @@
     <h4 class="fw-bold text-dark mb-2">Create Account</h4>
     <small class="text-muted">Join our supportive community</small>
   </div>
+    <!-- Блок с ошибками -->
+  {% if error_message %}
+  <div class="alert alert-danger text-center mb-4" role="alert">
+    {{ error_message }}
+  </div>
+  {% endif %}
 
     <!-- Обработка формы регистрации-->
   <form action="/register" method="POST">

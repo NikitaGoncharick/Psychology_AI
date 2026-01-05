@@ -1,13 +1,14 @@
 # main.py
 import os
 from contextlib import asynccontextmanager
+
 from redis.asyncio import Redis, RedisError
 import stripe
 from fastapi import FastAPI, Request, Form, Depends, HTTPException
-
-from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi.responses import RedirectResponse
+from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Optional, Dict
+from pydantic import ValidationError
 
 from dotenv import load_dotenv
 from config import settings # ← settings берёт значения уже из os.environ и занет все ключи
@@ -166,17 +167,26 @@ async def show_register_page(request: Request):
     return templates.TemplateResponse("register_page.html", {"request": request})
 
 @app.post("/register")
-async def register_user(db: AsyncSession = Depends(get_db), email: str = Form(...), password: str = Form(...)):
+async def register_user(request: Request, db: AsyncSession = Depends(get_db), email: str = Form(...), password: str = Form(...)):
+    context = {"request": request, "email": email}
     # 1. Валидация через Pydantic
     try:
        user_data = UserCreateSchema(email=email, password=password)
-    except Exception as error:
-       raise HTTPException(status_code=400, detail=str(error))
+    except ValidationError as e:
+        for error in e.errors():
+            if "password" in error["loc"]:
+                context["error_message"] = "The password must contain at least 8 characters"
+                break
+        else:
+            context["error_message"] = "Error in the form data"
+        return templates.TemplateResponse("register_page.html", context, status_code=400)
+
 
     #2. Проверка, существует ли пользователь
     existing_user = await UserCRUD.get_user_by_email(db, user_data.email)
     if existing_user:
-        raise HTTPException(status_code=400, detail="Email already registered")
+        context["error_message"] = "Email already registered"
+        return templates.TemplateResponse("register_page.html", context, status_code=400)
 
     #3. Создаём пользователя
     await UserCRUD.create_new_user(db, user_data)
