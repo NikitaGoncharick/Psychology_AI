@@ -69,54 +69,58 @@
 
   @media (max-width: 991px) {
   .stats-section {
-    padding: 70px 0;               /* уменьшаем вертикальные отступы */
+    padding: 60px 0;
+  }
+
+  .stats-bg {
+    opacity: 0.4;                    /* фон мешает — делаем его полупрозрачным */
   }
 
   .stat-card {
-    padding: 36px 20px;            /* меньше внутренние отступы */
+    padding: 32px 20px;
+    min-width: 280px;                /* не даём стать слишком узкими */
   }
 
   .stat-number {
-    font-size: 3.2rem;             /* было 3.8 → стало меньше */
-  }
-
-  .stat-label {
-    font-size: 1rem;
+    font-size: 3rem;                 /* чуть меньше, но всё ещё эффектно */
   }
 }
 
 @media (max-width: 767px) {
   .stats-section {
-    padding: 60px 0;
+    padding: 50px 0;
+    background: #f8f9fa;             /* на узких экранах лучше простой фон */
   }
 
-  .row.g-5 {
-    row-gap: 2.5rem !important;    /* расстояние между карточками при переходе в столбец */
+  .stats-bg {
+    display: none;                   /* ← главное решение: полностью убираем фон-картинку */
+  }
+
+  .row.g-5 > .col-md-4 {
+    flex: 0 0 100%;                  /* принудительно в столбик */
+    max-width: 100%;
   }
 
   .stat-card {
-    padding: 32px 24px;
-    max-width: 380px;              /* ограничиваем максимальную ширину, чтобы не растягивались */
-    margin-left: auto;
-    margin-right: auto;
+    margin: 0 auto;
+    max-width: 360px;                /* красивая ширина на мобильном */
+    padding: 40px 24px;              /* больше воздуха внутри карточки */
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
   }
 
   .stat-number {
     font-size: 2.8rem;
+    margin-bottom: 12px;
   }
 
   .stat-label {
-    font-size: 1.05rem;
+    font-size: 1.1rem;
   }
 }
 
-@media (max-width: 576px) {
-  .stats-section {
-    padding: 50px 0;
-  }
-
+@media (max-width: 480px) {
   .stat-card {
-    padding: 28px 20px;
+    padding: 32px 20px;
   }
 
   .stat-number {
@@ -124,7 +128,7 @@
   }
 
   .stat-label {
-    font-size: 0.98rem;
+    font-size: 1rem;
   }
 }
 
