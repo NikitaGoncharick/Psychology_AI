@@ -127,6 +127,106 @@
       z-index: 9999;
       transition: opacity 0.3s ease;
     }
+
+    @media (max-width: 767px) {
+      /* Hero - главная секция */
+      .hero {
+        min-height: auto;
+        padding: 100px 0 60px;           /* учитываем sticky header ~65px + запас */
+      }
+
+      .hero h1 {
+        font-size: 2.4rem !important;    /* было 3.5 → стало 2.4 */
+        line-height: 1.15;
+        margin-bottom: 1.25rem;
+      }
+
+      .hero p.lead {
+        font-size: 1.15rem !important;
+        max-width: 100%;
+      }
+
+      /* Кнопки в hero становятся столбцом */
+      .hero .btn-primary-custom,
+      .hero .btn-outline-secondary {
+        width: 100%;
+        margin: 0.75rem 0;
+        padding: 14px 24px;
+        font-size: 1.05rem;
+      }
+
+      /* Картинка в hero */
+      .hero img.img-fluid {
+        max-width: 100%;
+        height: auto;
+      }
+
+      .hero .col-lg-6 {
+        margin-bottom: 2.5rem;
+      }
+
+      /* Floating shapes — уменьшаем или убираем, они часто мешают */
+      .floating-shape {
+        width: 180px !important;
+        height: 180px !important;
+        opacity: 0.6;
+      }
+
+      /* Features (карточки преимуществ) */
+      .feature-card {
+        padding: 32px 20px;
+      }
+
+      .feature-icon {
+        width: 80px;
+        height: 80px;
+        font-size: 2.2rem;
+      }
+
+      /* Testimonial */
+      .testimonial {
+        padding: 32px 24px;
+      }
+
+      .testimonial::before {
+        font-size: 6rem;
+        left: 10px;
+        top: -20px;
+      }
+
+      /* Последний CTA */
+      .btn-primary-custom.btn-lg {
+        font-size: 1.15rem !important;
+        padding: 16px 40px !important;
+      }
+
+      /* Общий контейнер — меньше боковых отступов */
+      .container {
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+      }
+    }
+
+    /* Очень узкие экраны (iPhone SE, старые Android и т.п.) */
+    @media (max-width: 576px) {
+      .hero h1 {
+        font-size: 2.1rem !important;
+      }
+
+      .hero p.lead {
+        font-size: 1.05rem !important;
+      }
+
+      .feature-card {
+        padding: 28px 18px;
+      }
+
+      .btn-primary-custom,
+      .btn-outline-secondary {
+        padding: 12px 20px !important;
+        font-size: 1rem !important;
+      }
+    }
   </style>
 <!-- Hero Section -->
   <section class="hero">
