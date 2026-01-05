@@ -67,44 +67,48 @@
   .msg-ai   { background: var(--teal); color: white; border-radius: 18px 18px 18px 4px; max-width: 80%; padding: 0.75rem 1rem; margin: 0.5rem 1rem; }
   .msg-user { background: var(--teal-light); border-radius: 18px 18px 4px 18px; max-width: 80%; padding: 0.75rem 1rem; margin: 0.5rem 1rem; }
 
-/* Для всех экранов меньше 992px */
 @media (max-width: 991px) {
-  .stats-section .stats-row {
+  .stats-section .row {
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
     gap: 48px;
-    margin: 0 auto;
+    margin: 0;
     padding: 0 1rem;
     width: 100%;
   }
 
-  .stats-section .stats-row .stat-card {
-    width: 100% !important;
-    max-width: 300px;
-    margin-left: auto !important;
-    margin-right: auto !important;
-    display: block;
+  .stat-card {
+    width: 90%;                      /* ← вместо min-width */
+    max-width: 480px;
+    min-width: unset;                /* ← убираем фиксированный минимум */
+    padding: 48px 40px;
+    margin: 0 auto;
+    text-align: center;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.09);
+    border-radius: 32px;
+    box-sizing: border-box;          /* ← важно! padding включен в ширину */
   }
 }
 
-/* Для экранов меньше 768px */
 @media (max-width: 767px) {
-  .stats-section .stats-row {
+  .stats-section .row {
     gap: 56px;
-    padding: 0 0.5rem;
+  }
+
+  .stat-card {
+    width: 95%;                      /* на мобильных почти во всю ширину */
+    max-width: 420px;
+    padding: 52px 48px;
   }
 }
 
-/* Для экранов меньше 480px */
 @media (max-width: 480px) {
-  .stats-section .stats-row {
-    gap: 48px;
-    padding: 0 0.25rem;
-  }
-
-  .stats-section .stats-row .stat-card {
-    max-width: 280px;
+  .stat-card {
+    width: 100%;                     /* на маленьких экранах — вся ширина */
+    max-width: 380px;
+    padding: 48px 36px;
   }
 }
 </style>
