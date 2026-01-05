@@ -69,40 +69,40 @@
 
   @media (max-width: 991px) {
   .stats-section {
-    padding: 60px 0;
+    padding: 70px 0;
   }
 
   .stats-bg {
-    opacity: 0.25;                   /* сильно приглушаем фон */
+    opacity: 0.2;
   }
 
   .stat-card {
-    padding: 28px 20px;              /* сильно уменьшаем внутренние отступы */
-    min-width: 260px;
-    max-width: 320px;
-    margin: 0 auto;
+    padding: 40px 28px;              /* больше внутреннего пространства */
+    min-width: 300px;
+    max-width: 380px;
+    margin: 0 auto 32px auto;        /* расстояние между карточками */
+    box-shadow: 0 10px 30px rgba(0,0,0,0.07);
   }
 
   .stat-number {
-    font-size: 2.6rem;               /* ← значительно меньше, чем было */
-    line-height: 1;
-    margin-bottom: 8px;
+    font-size: 3rem;
+    margin-bottom: 12px;
   }
 
   .stat-label {
-    font-size: 0.95rem;
-    line-height: 1.3;
+    font-size: 1.05rem;
+    line-height: 1.35;
   }
 }
 
 @media (max-width: 767px) {
   .stats-section {
-    padding: 50px 0;
-    background: #f9fafb;             /* простой фон вместо картинки */
+    padding: 60px 0;
+    background: #f9fafb;
   }
 
   .stats-bg {
-    display: none;                   /* ← полностью убираем фон-картинку на узких экранах */
+    display: none;                   /* фон только мешает на узких экранах */
   }
 
   .row.g-5 > div {
@@ -111,27 +111,39 @@
   }
 
   .stat-card {
-    padding: 32px 28px;
-    max-width: 340px;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.08);  /* лёгкая тень вместо тяжёлой */
+    padding: 44px 32px;              /* ещё больше воздуха внутри */
+    max-width: 400px;
+    margin: 0 auto 40px auto;        /* большое расстояние между карточками */
+    border-radius: 24px;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.08);
   }
 
   .stat-number {
-    font-size: 2.4rem;
+    font-size: 2.8rem;
+  }
+
+  .stat-label {
+    font-size: 1.1rem;
   }
 }
 
 @media (max-width: 480px) {
+  .stats-section {
+    padding: 50px 0;
+  }
+
   .stat-card {
-    padding: 28px 20px;
+    padding: 36px 24px;
+    max-width: 360px;
+    margin-bottom: 36px;
   }
 
   .stat-number {
-    font-size: 2.1rem;
+    font-size: 2.5rem;
   }
 
   .stat-label {
-    font-size: 0.92rem;
+    font-size: 1rem;
   }
 }
 </style>
