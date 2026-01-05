@@ -68,14 +68,13 @@
   .msg-ai   { background: var(--teal); color: white; border-radius: 18px 18px 18px 4px; max-width: 80%; padding: 0.75rem 1rem; margin: 0.5rem 1rem; }
   .msg-user { background: var(--teal-light); border-radius: 18px 18px 4px 18px; max-width: 80%; padding: 0.75rem 1rem; margin: 0.5rem 1rem; }
 
-    @media (max-width: 991px) {
+  @media (max-width: 991px) {
   .header-container {
     padding: 0 1.25rem;
     justify-content: space-between;
     gap: 1.5rem;
   }
 
-  /* Показываем ТОЛЬКО AI-Chat */
   .nav-links a:not([href="/conversations"]) {
     display: none !important;
   }
@@ -92,16 +91,14 @@
     color: var(--teal);
   }
 
-  /* Убираем Login полностью */
   .header-right a.text-dark {
     display: none !important;
   }
 
-  /* Get Started — более компактная версия */
   .btn-get-started {
-    padding: 0.5rem 1.2rem;          /* было 0.55rem 1.4rem → стало меньше */
-    font-size: 0.94rem;               /* чуть меньше текста */
-    min-width: 110px;                 /* минимальная ширина, чтобы не было слишком узко */
+    padding: 0.45rem 1.1rem;         /* ещё меньше */
+    font-size: 0.92rem;
+    min-width: 105px;
     line-height: 1.3;
   }
 
@@ -120,11 +117,10 @@
     font-size: 1rem;
   }
 
-  /* Ещё более компактная кнопка на очень маленьких экранах */
   .btn-get-started {
-    padding: 0.45rem 1rem;           /* финальное уменьшение */
-    font-size: 0.9rem;
-    min-width: 100px;
+    padding: 0.4rem 0.95rem;         /* максимально компактно */
+    font-size: 0.88rem;
+    min-width: 98px;
   }
 
   .logo {
