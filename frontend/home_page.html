@@ -88,8 +88,8 @@
   .nav-links a[href="/conversations"] {
     margin: 0 1rem;
     font-size: 1.05rem;
-    font-weight: 600;           /* делаем чуть жирнее, чтобы лучше читалось */
-    color: var(--teal);         /* выделяем цветом, чтобы был акцент */
+    font-weight: 600;
+    color: var(--teal);
   }
 
   /* Убираем Login полностью */
@@ -97,12 +97,12 @@
     display: none !important;
   }
 
-  /* Get Started — остаётся главным CTA */
+  /* Get Started — более компактная версия */
   .btn-get-started {
-    padding: 0.55rem 1.4rem;
-    font-size: 0.97rem;
-    min-width: 120px;
-    text-align: center;
+    padding: 0.5rem 1.2rem;          /* было 0.55rem 1.4rem → стало меньше */
+    font-size: 0.94rem;               /* чуть меньше текста */
+    min-width: 110px;                 /* минимальная ширина, чтобы не было слишком узко */
+    line-height: 1.3;
   }
 
   .logo {
@@ -110,7 +110,6 @@
   }
 }
 
-/* Самые маленькие экраны */
 @media (max-width: 576px) {
   .header-container {
     padding: 0 1rem;
@@ -121,10 +120,11 @@
     font-size: 1rem;
   }
 
+  /* Ещё более компактная кнопка на очень маленьких экранах */
   .btn-get-started {
-    padding: 0.5rem 1.2rem;
-    font-size: 0.93rem;
-    min-width: 110px;
+    padding: 0.45rem 1rem;           /* финальное уменьшение */
+    font-size: 0.9rem;
+    min-width: 100px;
   }
 
   .logo {
