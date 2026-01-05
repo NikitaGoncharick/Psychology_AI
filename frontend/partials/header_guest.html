@@ -35,64 +35,6 @@
     box-shadow: 0 10px 25px rgba(74,144,134,0.25);
   }
 
-  @media (max-width: 991px) {   /* или 992px — можно подстроить под свой дизайн */
-  .header-container {
-    padding: 0 1.25rem;           /* меньше отступов по бокам */
-    justify-content: space-between;
-    gap: 1rem;
-  }
-
-  .nav-links {
-    display: flex;
-    align-items: center;
-    margin: 0;
-    flex: 0 0 auto;
-  }
-
-  .nav-links a {
-    margin: 0 0.8rem !important;   /* плотнее, но читаемо */
-    font-size: 1rem;
-  }
-
-  /* Показываем только AI-Chat, остальные скрываем */
-  .nav-links a:not([href="/conversations"]) {
-    display: none;
-  }
-
-  .header-right {
-    display: flex;
-    align-items: center;
-    gap: 1rem;                    /* Login + Get Started ближе */
-  }
-
-  /* Делаем Login чуть меньше и скромнее */
-  .header-right a.text-dark {
-    font-size: 0.95rem;
-    white-space: nowrap;
-  }
-
-  /* Кнопка Get Started — остаётся заметной */
-  .btn-get-started {
-    padding: 0.55rem 1.3rem;
-    font-size: 0.95rem;
-  }
-}
-
-/* Очень маленькие экраны (iPhone SE и подобные) */
-@media (max-width: 576px) {
-  .header-container {
-    padding: 0 1rem;
-  }
-
-  .btn-get-started {
-    padding: 0.5rem 1.1rem;
-    font-size: 0.92rem;
-  }
-
-  .logo {
-    font-size: 1.8rem;          /* логотип чуть меньше */
-  }
-}
 </style>
 
 <!-- ХЕДЕР  -->

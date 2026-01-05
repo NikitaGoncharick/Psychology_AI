@@ -68,7 +68,47 @@
   .msg-ai   { background: var(--teal); color: white; border-radius: 18px 18px 18px 4px; max-width: 80%; padding: 0.75rem 1rem; margin: 0.5rem 1rem; }
   .msg-user { background: var(--teal-light); border-radius: 18px 18px 4px 18px; max-width: 80%; padding: 0.75rem 1rem; margin: 0.5rem 1rem; }
 
+    @media (max-width: 991px) {
+    .header-container {
+      padding: 0 1.25rem;
+    }
 
+    .nav-links a:not([href="/conversations"]) {
+      display: none;
+    }
+
+    .nav-links {
+      margin: 0;
+    }
+
+    .nav-links a {
+      margin: 0 0.8rem !important;
+      font-size: 1rem;
+    }
+
+    .header-right {
+      gap: 1rem;
+    }
+
+    .btn-get-started {
+      padding: 0.55rem 1.3rem;
+      font-size: 0.95rem;
+    }
+
+    .logo {
+      font-size: 1.9rem;
+    }
+  }
+
+  @media (max-width: 576px) {
+    .header-container {
+      padding: 0 1rem;
+    }
+    .btn-get-started {
+      padding: 0.5rem 1.1rem;
+      font-size: 0.92rem;
+    }
+  }
 </style>
 </head>
 <body>
