@@ -67,6 +67,67 @@
   .msg-ai   { background: var(--teal); color: white; border-radius: 18px 18px 18px 4px; max-width: 80%; padding: 0.75rem 1rem; margin: 0.5rem 1rem; }
   .msg-user { background: var(--teal-light); border-radius: 18px 18px 4px 18px; max-width: 80%; padding: 0.75rem 1rem; margin: 0.5rem 1rem; }
 
+  @media (max-width: 991px) {
+  .stats-section {
+    padding: 70px 0;               /* уменьшаем вертикальные отступы */
+  }
+
+  .stat-card {
+    padding: 36px 20px;            /* меньше внутренние отступы */
+  }
+
+  .stat-number {
+    font-size: 3.2rem;             /* было 3.8 → стало меньше */
+  }
+
+  .stat-label {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 767px) {
+  .stats-section {
+    padding: 60px 0;
+  }
+
+  .row.g-5 {
+    row-gap: 2.5rem !important;    /* расстояние между карточками при переходе в столбец */
+  }
+
+  .stat-card {
+    padding: 32px 24px;
+    max-width: 380px;              /* ограничиваем максимальную ширину, чтобы не растягивались */
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .stat-number {
+    font-size: 2.8rem;
+  }
+
+  .stat-label {
+    font-size: 1.05rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .stats-section {
+    padding: 50px 0;
+  }
+
+  .stat-card {
+    padding: 28px 20px;
+  }
+
+  .stat-number {
+    font-size: 2.4rem;
+  }
+
+  .stat-label {
+    font-size: 0.98rem;
+  }
+}
+
 
 </style>
 </head>
