@@ -67,22 +67,71 @@
   .msg-ai   { background: var(--teal); color: white; border-radius: 18px 18px 18px 4px; max-width: 80%; padding: 0.75rem 1rem; margin: 0.5rem 1rem; }
   .msg-user { background: var(--teal-light); border-radius: 18px 18px 4px 18px; max-width: 80%; padding: 0.75rem 1rem; margin: 0.5rem 1rem; }
 
-  @media (max-width: 991px) {
+@media (max-width: 991px) {
   .stats-section {
     padding: 60px 0;
   }
 
   .stats-bg {
-    opacity: 0.4;                    /* фон мешает — делаем его полупрозрачным */
+    opacity: 0.25;                   /* сильно приглушаем фон */
   }
 
   .stat-card {
-    padding: 32px 20px;
-    min-width: 280px;                /* не даём стать слишком узкими */
+    padding: 28px 20px;              /* сильно уменьшаем внутренние отступы */
+    min-width: 260px;
+    max-width: 320px;
+    margin: 0 auto;
   }
 
   .stat-number {
-    font-size: 3rem;                 /* чуть меньше, но всё ещё эффектно */
+    font-size: 2.6rem;               /* ← значительно меньше, чем было */
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+
+  .stat-label {
+    font-size: 0.95rem;
+    line-height: 1.3;
+  }
+}
+
+@media (max-width: 767px) {
+  .stats-section {
+    padding: 50px 0;
+    background: #f9fafb;             /* простой фон вместо картинки */
+  }
+
+  .stats-bg {
+    display: none;                   /* ← полностью убираем фон-картинку на узких экранах */
+  }
+
+  .row.g-5 > div {
+    flex: 0 0 100% !important;
+    max-width: 100% !important;
+  }
+
+  .stat-card {
+    padding: 32px 28px;
+    max-width: 340px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.08);  /* лёгкая тень вместо тяжёлой */
+  }
+
+  .stat-number {
+    font-size: 2.4rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .stat-card {
+    padding: 28px 20px;
+  }
+
+  .stat-number {
+    font-size: 2.1rem;
+  }
+
+  .stat-label {
+    font-size: 0.92rem;
   }
 }
 
